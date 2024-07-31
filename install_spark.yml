@@ -17,7 +17,7 @@
   tasks:
     - name: Download Spark
       get_url:
-        url: "https://downloads.apache.org/spark/spark-{{ spark_version }}/spark-{{ spark_version }}-bin-hadoop3.tgz"
+        url: "https://dlcdn.apache.org/spark/{{ spark_version }}/{{ spark_version }}-bin-hadoop3.tgz"
         dest: "/tmp/spark-{{ spark_version }}-bin-hadoop3.tgz"
 
     - name: Extract Spark
