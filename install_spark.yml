@@ -28,7 +28,7 @@
         creates: "/usr/local/{{ spark_version }}"
 
     - name: Rename Hadoop directory
-      command: mv /usr/local/{{ spark_version }}-bin-hadoop3.tgz /usr/local/spark
+      command: mv /usr/local/{{ spark_version }}-bin-hadoop3 /usr/local/spark
       
     - name: Ensure /etc/profile.d/ directory exists
       file:
