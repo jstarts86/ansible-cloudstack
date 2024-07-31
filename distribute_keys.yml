@@ -1,14 +1,27 @@
 ---
-- name: Generate SSH key pair on NameNode
-  hosts: hadoop_namenode
+- name: Distribute SSH keys among Hadoop nodes
+  hosts: hadoop_cluster
   become: yes
   become_user: ubuntu
   tasks:
-    - name: Check if SSH key already exists
-      stat:
-        path: "/home/ubuntu/.ssh/id_rsa"
-      register: ssh_key
+    - name: Fetch public key from Each NameNode
+      slurp:
+        src: "/home/ubuntu/.ssh/id_rsa.pub"
+      register: ssh_pub_keys
+      delegate_to: "{{ item }}"
+      with_items: "{{ groups['hadoop_namenode'] }}"
+      run_once: true
 
-    - name: Generate SSH key pair
-      command: ssh-keygen -t rsa -b 2048 -f /home/ubuntu/.ssh/id_rsa -N ""
-      when: not ssh_key.stat.exists
+    - name: Ensure SSH directory exists
+      file:
+        path: "/home/ubuntu/.ssh"
+        state: directory
+        mode: '0700'
+
+    - name: Add public keys to authorized_keys
+      authorized_key:
+        user: ubuntu
+        key: "{{ item.content | b64decode }}"
+        state: present
+      loop: "{{ ssh_pub_keys.results }}"
+
