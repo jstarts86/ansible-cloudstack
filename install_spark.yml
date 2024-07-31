@@ -1,0 +1,46 @@
+---
+- name: Install and Configure Spark
+  hosts: hadoop_namenode
+  become: true
+  vars:
+    spark_version: "spark-3.4.3"
+    spark_home: "/usr/local/spark"
+    hadoop_home: "/usr/local/hadoop"
+    java_home: "/usr/lib/jvm/java-1.8.0-openjdk-amd64"  # Ensure this matches the Java version used in Hadoop
+    namenode_hostname: "Master1"
+    spark_driver_memory: "1g"
+    spark_yarn_am_memory: "512m"
+    spark_executor_memory:  "512m"
+    spark_eventLog_enabled: "true"
+    spark_history_fs_update_interval: "10s"
+    spark_history_ui_port: "18080"
+  tasks:
+    - name: Download Spark
+      get_url:
+        url: "https://downloads.apache.org/spark/spark-{{ spark_version }}/spark-{{ spark_version }}-bin-hadoop3.tgz"
+        dest: "/tmp/spark-{{ spark_version }}-bin-hadoop3.tgz"
+
+    - name: Extract Spark
+      unarchive:
+        src: "/tmp/spark-{{ spark_version }}-bin-hadoop3.tgz"
+        dest: "/usr/local"
+        remote_src: yes
+        creates: "{{ spark_home }}"
+
+    - name: Set Spark environment variables
+      lineinfile:
+        path: "/etc/profile.d/spark.sh"
+        line: "{{ item }}"
+      with_items:
+        - "export SPARK_HOME={{ spark_home }}"
+        - "export PATH=$PATH:{{ spark_home }}/bin:{{ spark_home }}/sbin"
+        - "export HADOOP_CONF_DIR={{ hadoop_home }}/etc/hadoop"
+        - "export JAVA_HOME={{ java_home }}"
+
+    - name: Template Spark configuration files
+      template:
+        src: "templates/spark/{{ item.src }}"
+        dest: "{{ spark_home }}/conf/{{ item.dest }}"
+      loop:
+        - { src: 'spark-defaults.conf.j2', dest: 'spark-defaults.conf' }
+        - { src: 'spark-env.sh.j2', dest: 'spark-env.sh' }

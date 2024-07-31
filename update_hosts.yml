@@ -1,0 +1,16 @@
+---
+- name: Update /etc/hosts for Hadoop cluster communication
+  hosts: all
+  become: yes
+  tasks:
+    - name: Gather hosts facts
+      setup:
+
+    - name: Ensure /etc/hosts has correct entries
+      lineinfile:
+        path: /etc/hosts
+        create: yes
+        state: present
+        line: "{{ item.value }} {{ item.key }}"
+      loop: "{{ groups['all'] | map('extract', hostvars, ['ansible_default_ipv4', 'address']) | zip(groups['all']) | items2dict }}"
+      when: "item.value is defined"

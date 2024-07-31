@@ -1,0 +1,19 @@
+<configuration>
+    <property>
+        <name>dfs.namenode.name.dir</name>
+        <value>file://{{ name_node_dir }}</value>
+    </property>
+    <property>
+        <name>dfs.datanode.data.dir</name>
+        <value>file://{{ data_node_dir }}</value>
+    </property>
+    <property>
+        <name>dfs.replication</name>
+        <value>{{ replication_factor }}</value>
+    </property>
+    <property>
+        <name>webhdfs.enabled</name>
+        <value>true</value>
+    </property>
+</configuration>
+

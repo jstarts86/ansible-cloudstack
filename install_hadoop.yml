@@ -1,0 +1,81 @@
+---
+- name: Install and Configure Hadoop
+  hosts: all
+  become: true
+  vars:
+    hadoop_version: "hadoop-3.3.6"
+    hadoop_home: "/usr/local/hadoop"
+    java_home: "/usr/lib/jvm/java-1.8.0-openjdk-amd64"  # Java 8 is more commonly used with Hadoop
+    name_node_dir: "/home/ubuntu/data/nameNode"
+    data_node_dir: "/home/ubuntu/data/dataNode"
+    yarn_app_mapreduce_resource_mb: "512"
+    yarn_app_map_resource_mb: "256"
+    yarn_app_reduce_resource_mb: "256"
+    replication_factor: "1"
+    yarn_acl_enable: "0"
+    yarn_nodemanager_resource_memory_mb: "1536"
+    yarn_scheduler_maximum_allocation_mb: "1536"
+    yarn_scheduler_minimum_allocation_mb: "128"
+    yarn_nodemanager_vmem_check_enabled: "false"
+    namenode_hostname: "Master1"
+  tasks:
+    - name: Install necessary packages
+      apt:
+        name:
+          - wget
+          - tar
+        state: present
+        update_cache: yes
+
+    - name: Download Hadoop
+      get_url:
+        url: "https://downloads.apache.org/hadoop/common/{{ hadoop_version }}/{{ hadoop_version }}.tar.gz"
+        dest: "/tmp/{{ hadoop_version }}.tar.gz"
+
+    - name: Extract Hadoop
+      unarchive:
+        src: "/tmp/{{ hadoop_version }}.tar.gz"
+        dest: "/usr/local"
+        remote_src: yes
+        creates: "{{ hadoop_home }}"
+
+    - name: Set Hadoop environment variables
+      lineinfile:
+        path: "/etc/profile.d/hadoop.sh"
+        line: "{{ item }}"
+      with_items:
+        - "export HADOOP_HOME={{ hadoop_home }}"
+        - "export PATH=$PATH:{{ hadoop_home }}/bin:{{ hadoop_home }}/sbin"
+        - "export JAVA_HOME={{ java_home }}"
+
+    - name: Template Hadoop configuration files
+      template:
+        src: "templates/hadoop/{{ item.src }}"
+        dest: "{{ hadoop_home }}/etc/hadoop/{{ item.dest }}"
+      loop:
+        - { src: 'core-site.xml.j2', dest: 'core-site.xml' }
+        - { src: 'hdfs-site.xml.j2', dest: 'hdfs-site.xml' }
+        - { src: 'yarn-site.xml.j2', dest: 'yarn-site.xml' }
+        - { src: 'mapred-site.xml.j2', dest: 'mapred-site.xml' }
+
+    - name: Template Hadoop environment file
+      template:
+        src: "templates/hadoop/hadoop-env.sh.j2"
+        dest: "{{ hadoop_home }}/etc/hadoop/hadoop-env.sh"
+
+    - name: Template .profile
+      template:
+        src: "templates/profile.j2"
+        dest: "/home/ubuntu/.profile"
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
+    - name: Template .bashrc
+      template:
+        src: "templates/bashrc.j2"
+        dest: "/home/ubuntu/.bashrc"
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
