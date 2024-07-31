@@ -5,7 +5,7 @@
   vars:
     hadoop_version: "hadoop-3.3.6"
     hadoop_home: "/usr/local/hadoop"
-    java_home: "/usr/lib/jvm/java-1.8.0-openjdk-amd64"  # Java 8 is more commonly used with Hadoop
+    java_home: "/usr/lib/jvm/java-1.8.0-openjdk-amd64"
     name_node_dir: "/home/ubuntu/data/nameNode"
     data_node_dir: "/home/ubuntu/data/dataNode"
     yarn_app_mapreduce_resource_mb: "512"
@@ -38,11 +38,9 @@
         dest: "/usr/local"
         remote_src: yes
         creates: "/usr/local/{{ hadoop_version }}"
+
     - name: Rename Hadoop directory
-      file:
-        src: /usr/local/{{ hadoop_version }}
-        dest: /usr/local/hadoop
-        state: rename
+      command: mv /usr/local/{{ hadoop_version }} /usr/local/hadoop
 
     - name: Ensure /etc/profile.d/ directory exists
       file:

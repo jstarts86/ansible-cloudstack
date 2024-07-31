@@ -27,12 +27,9 @@
         remote_src: yes
         creates: "/usr/local/{{ spark_version }}"
 
-    - name: Rename Spark directory
-      file:
-        src: /usr/local/{{ spark_version }}
-        dest: /usr/local/spark
-        state: rename
-
+    - name: Rename Hadoop directory
+      command: mv /usr/local/{{ spark_version }} /usr/local/spark
+      
     - name: Ensure /etc/profile.d/ directory exists
       file:
         path: /etc/profile.d
