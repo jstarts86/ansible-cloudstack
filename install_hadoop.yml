@@ -5,7 +5,7 @@
   vars:
     hadoop_version: "hadoop-3.3.6"
     hadoop_home: "/usr/local/hadoop"
-    java_home: "/usr/lib/jvm/java-1.8.0-openjdk-amd64"
+    java_home: "/usr/lib/jvm/java-1.11.0-openjdk-amd64"
     name_node_dir: "/home/ubuntu/data/nameNode"
     data_node_dir: "/home/ubuntu/data/dataNode"
     yarn_app_mapreduce_resource_mb: "512"
