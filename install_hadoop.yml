@@ -38,7 +38,11 @@
         dest: "/usr/local"
         remote_src: yes
         creates: "{{ hadoop_home }}"
-
+    - name: Ensure Hadoop Config directory exists
+      file:
+        path: "{{ hadoop_home }}/etc/hadoop"
+        state: directory
+        mode: '0755'
     - name: Ensure /etc/profile.d/ directory exists
       file:
         path: /etc/profile.d
