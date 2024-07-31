@@ -39,6 +39,12 @@
         remote_src: yes
         creates: "{{ hadoop_home }}"
 
+    - name: Ensure /etc/profile.d/ directory exists
+      file:
+        path: /etc/profile.d
+        state: directory
+        mode: '0755'
+
     - name: Set Hadoop environment variables
       lineinfile:
         path: "/etc/profile.d/hadoop.sh"
