@@ -10,7 +10,7 @@
     namenode_hostname: "Master1"
     spark_driver_memory: "1g"
     spark_yarn_am_memory: "512m"
-    spark_executor_memory:  "512m"
+    spark_executor_memory: "512m"
     spark_eventLog_enabled: "true"
     spark_history_fs_update_interval: "10s"
     spark_history_ui_port: "18080"
@@ -27,15 +27,17 @@
         remote_src: yes
         creates: "{{ spark_home }}"
 
+    - name: Ensure /etc/profile.d/ directory exists
+      file:
+        path: /etc/profile.d
+        state: directory
+        mode: '0755'
+
     - name: Set Spark environment variables
-      lineinfile:
-        path: "/etc/profile.d/spark.sh"
-        line: "{{ item }}"
-      with_items:
-        - "export SPARK_HOME={{ spark_home }}"
-        - "export PATH=$PATH:{{ spark_home }}/bin:{{ spark_home }}/sbin"
-        - "export HADOOP_CONF_DIR={{ hadoop_home }}/etc/hadoop"
-        - "export JAVA_HOME={{ java_home }}"
+      template:
+        src: "templates/spark/spark.sh.j2"
+        dest: "/etc/profile.d/spark.sh"
+        mode: '0755'
 
     - name: Template Spark configuration files
       template:
@@ -44,3 +46,4 @@
       loop:
         - { src: 'spark-defaults.conf.j2', dest: 'spark-defaults.conf' }
         - { src: 'spark-env.sh.j2', dest: 'spark-env.sh' }
+
