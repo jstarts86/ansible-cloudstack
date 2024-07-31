@@ -27,11 +27,13 @@
         remote_src: yes
         creates: "{{ spark_home }}"
 
+
     - name: Ensure /etc/profile.d/ directory exists
       file:
         path: /etc/profile.d
         state: directory
         mode: '0755'
+
 
     - name: Set Spark environment variables
       template:
