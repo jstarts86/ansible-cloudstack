@@ -46,13 +46,10 @@
         mode: '0755'
 
     - name: Set Hadoop environment variables
-      lineinfile:
-        path: "/etc/profile.d/hadoop.sh"
-        line: "{{ item }}"
-      with_items:
-        - "export HADOOP_HOME={{ hadoop_home }}"
-        - "export PATH=$PATH:{{ hadoop_home }}/bin:{{ hadoop_home }}/sbin"
-        - "export JAVA_HOME={{ java_home }}"
+      template:
+        src: "templates/hadoop/hadoop.sh.j2"
+        dest: "/etc/profile.d/hadoop.sh"
+        mode: '0755'
 
     - name: Template Hadoop configuration files
       template:
