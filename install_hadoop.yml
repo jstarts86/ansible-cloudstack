@@ -85,3 +85,10 @@
         group: ubuntu
         mode: '0644'
 
+    - name: Create workers file
+      template:
+        src: "templates/hadoop/workers.j2"
+        dest: "{{ hadoop_home }}/etc/hadoop/workers"
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
