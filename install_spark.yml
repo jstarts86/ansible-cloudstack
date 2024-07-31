@@ -25,8 +25,13 @@
         src: "/tmp/spark-{{ spark_version }}-bin-hadoop3.tgz"
         dest: "/usr/local"
         remote_src: yes
-        creates: "{{ spark_home }}"
+        creates: "/usr/local/{{ spark_version }}"
 
+    - name: Rename Spark directory
+      file:
+        src: /usr/local/{{ spark_version }}
+        dest: /usr/local/spark
+        state: rename
 
     - name: Ensure /etc/profile.d/ directory exists
       file:

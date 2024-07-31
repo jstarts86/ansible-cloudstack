@@ -37,7 +37,13 @@
         src: "/tmp/{{ hadoop_version }}.tar.gz"
         dest: "/usr/local"
         remote_src: yes
-        creates: "{{ hadoop_home }}"
+        creates: "/usr/local/{{ hadoop_version }}"
+    - name: Rename Hadoop directory
+      file:
+        src: /usr/local/{{ hadoop_version }}
+        dest: /usr/local/hadoop
+        state: rename
+
     - name: Ensure /etc/profile.d/ directory exists
       file:
         path: /etc/profile.d
