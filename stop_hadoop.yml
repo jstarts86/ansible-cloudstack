@@ -1,0 +1,12 @@
+---
+- name: Stop Hadoop Services
+  hosts: hadoop_namenode
+  become: yes
+  tasks:
+    - name: Stop YARN
+      shell: stop-yarn.sh
+      become_user: ubuntu
+
+    - name: Stop HDFS
+      shell: stop-dfs.sh
+      become_user: ubuntu

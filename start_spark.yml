@@ -1,0 +1,22 @@
+---
+- name: Start Spark Services
+  hosts: hadoop_namenode
+  become: yes
+  tasks:
+    - name: Start Spark Master
+      shell: "{{ spark_home }}/sbin/start-master.sh"
+      become_user: ubuntu
+      environment:
+        SPARK_HOME: "{{ spark_home }}"
+
+    - name: Start Spark Worker
+      shell: "{{ spark_home }}/sbin/start-worker.sh spark://{{ namenode_hostname }}:7077"
+      become_user: ubuntu
+      environment:
+        SPARK_HOME: "{{ spark_home }}"
+
+    - name: Start Spark History Server
+      shell: "{{ spark_home }}/sbin/start-history-server.sh"
+      become_user: ubuntu
+      environment:
+        SPARK_HOME: "{{ spark_home }}"

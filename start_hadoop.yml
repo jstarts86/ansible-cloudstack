@@ -1,0 +1,12 @@
+---
+- name: Start Hadoop Services
+  hosts: hadoop_namenode
+  become: yes
+  tasks:
+    - name: Start HDFS
+      shell: start-dfs.sh
+      become_user: ubuntu
+
+    - name: Start YARN
+      shell: start-yarn.sh
+      become_user: ubuntu
