@@ -1,0 +1,14 @@
+---
+- name: Generate SSH key pair on NameNode
+  hosts: hadoop_namenode
+  become: yes
+  become_user: ubuntu
+  tasks:
+    - name: Check if SSH key already exists
+      stat:
+        path: "/home/ubuntu/.ssh/id_rsa"
+      register: ssh_key
+
+    - name: Generate SSH key pair
+      command: ssh-keygen -t rsa -b 2048 -f /home/ubuntu/.ssh/id_rsa -N ""
+      when: not ssh_key.stat.exists
