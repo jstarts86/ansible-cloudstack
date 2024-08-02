@@ -49,3 +49,13 @@
       debug:
         var: jps_output.stdout_lines
 
+    - name: Fetch ResourceManager log
+      shell: cat /usr/local/hadoop/logs/yarn-yarn-resourcemanager-Master1.log
+      register: resourcemanager_log_output
+      when: "'ResourceManager' not in jps_output.stdout"
+
+    - name: Debug ResourceManager log
+      debug:
+        var: resourcemanager_log_output.stdout_lines
+      when: "'ResourceManager' not in jps_output.stdout"
+
