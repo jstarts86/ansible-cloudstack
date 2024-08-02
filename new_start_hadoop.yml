@@ -1,0 +1,45 @@
+---
+- name: Start Hadoop Services
+  hosts: hadoop_namenode
+  become: yes
+  tasks:
+    - name: Start HDFS
+      shell: "{{ hadoop_home }}/sbin/start-dfs.sh"
+      environment:
+        HADOOP_HOME: "{{ hadoop_home }}"
+      args:
+        executable: /bin/bash
+      register: hdfs_start_output
+
+    - name: Debug HDFS start output
+      debug:
+        var: hdfs_start_output.stdout_lines
+
+    - name: Debug HDFS start error
+      debug:
+        var: hdfs_start_output.stderr_lines
+
+    - name: Start YARN
+      shell: "{{ hadoop_home }}/sbin/start-yarn.sh"
+      environment:
+        HADOOP_HOME: "{{ hadoop_home }}"
+      args:
+        executable: /bin/bash
+      register: yarn_start_output
+
+    - name: Debug YARN start output
+      debug:
+        var: yarn_start_output.stdout_lines
+
+    - name: Debug YARN start error
+      debug:
+        var: yarn_start_output.stderr_lines
+
+    - name: Check ResourceManager process
+      shell: jps
+      register: jps_output
+
+    - name: Debug JPS output
+      debug:
+        var: jps_output.stdout_lines
+
