@@ -50,7 +50,7 @@
         var: jps_output.stdout_lines
 
     - name: Fetch ResourceManager log
-      shell: cat /usr/local/hadoop/logs/yarn-yarn-resourcemanager-Master1.log
+      shell: cat /usr/local/hadoop/logs/hadoop-ubuntu-resourcemanager-Master1.log
       register: resourcemanager_log_output
       when: "'ResourceManager' not in jps_output.stdout"
 
