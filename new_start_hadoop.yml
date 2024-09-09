@@ -3,6 +3,8 @@
   hosts: hadoop_namenode
   become: yes
   become_user: ubuntu
+  vars:
+    hadoop_home: "/usr/local/hadoop" 
   tasks:
     - name: Start HDFS
       shell: "{{ hadoop_home }}/sbin/start-dfs.sh"
