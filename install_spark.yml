@@ -9,12 +9,13 @@
     java_home: "/usr/lib/jvm/java-1.11.0-openjdk-amd64"  # Ensure this matches the Java version used in Hadoop
     namenode_hostname: "Master1"
     spark_history_provider: "org.apache.spark.deploy.history.FsHistoryProvider"
-    spark_driver_memory: "1g"
-    spark_yarn_am_memory: "512m"
-    spark_executor_memory: "512m"
+    spark_driver_memory: "6144m"
+    spark_yarn_am_memory: "2048m"
+    spark_executor_memory: "2560m"
     spark_eventLog_enabled: "true"
     spark_history_fs_update_interval: "10s"
     spark_history_ui_port: "18080"
+    spark_eventLog_dir: "hdfs://{{ namenode_hostname }}:9000/spark-logs"
   tasks:
     - name: Download Spark
       get_url:

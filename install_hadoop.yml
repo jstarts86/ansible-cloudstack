@@ -13,9 +13,9 @@
     yarn_app_reduce_resource_mb: "256"
     replication_factor: "1"
     yarn_acl_enable: "0"
-    yarn_nodemanager_resource_memory_mb: "1536"
-    yarn_scheduler_maximum_allocation_mb: "1536"
-    yarn_scheduler_minimum_allocation_mb: "128"
+    yarn_nodemanager_resource_memory_mb: "2560"
+    yarn_scheduler_maximum_allocation_mb: "2048"
+    yarn_scheduler_minimum_allocation_mb: "512"
     yarn_nodemanager_vmem_check_enabled: "false"
     namenode_hostname: "Master1"
   tasks:
