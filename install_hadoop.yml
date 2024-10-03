@@ -18,6 +18,7 @@
     yarn_scheduler_minimum_allocation_mb: "512"
     yarn_nodemanager_vmem_check_enabled: "false"
     namenode_hostname: "Master1"
+  
   tasks:
     - name: Install necessary packages
       apt:
@@ -97,6 +98,6 @@
       hosts: hadoop_namenode
       become: true
       tasks:
-          - name: Run 'hdfs namenode -format' on NameNode
-            command: hdfs namenode -format
-            when: inventory_hostname == "Master1"
+        - name: Run 'hdfs namenode -format' on NameNode
+          command: hdfs namenode -format
+          when: inventory_hostname == "Master1"
