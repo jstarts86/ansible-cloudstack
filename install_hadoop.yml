@@ -93,10 +93,10 @@
         group: ubuntu
         mode: '0644'
 
-     - name: Format the HDFS NameNode
-       hosts: hadoop_namenode
-       become: true
-       tasks:
-         - name: Run 'hdfs namenode -format' on NameNode
-           command: hdfs namenode -format
-           when: inventory_hostname == "Master1"
+    - name: Format the HDFS NameNode
+      hosts: hadoop_namenode
+      become: true
+      tasks:
+          - name: Run 'hdfs namenode -format' on NameNode
+            command: hdfs namenode -format
+            when: inventory_hostname == "Master1"
