@@ -1,4 +1,4 @@
-spark.history.provider            org.apache.spark.deploy.history.FsHistoryProvider
-spark.history.fs.logDirectory     hdfs://node-master:9000/spark-logs
-spark.history.fs.update.interval  10s
-spark.history.ui.port             18080
+spark.history.provider            {{ spark_history_provider }}
+spark.history.fs.logDirectory     hdfs://{{ namenode_hostname }}:9000/spark-logs
+spark.history.fs.update.interval  {{ spark_history_fs_update_interval }}
+spark.history.ui.port             {{ spark_history_ui_port }}

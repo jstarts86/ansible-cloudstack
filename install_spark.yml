@@ -8,6 +8,7 @@
     hadoop_home: "/usr/local/hadoop"
     java_home: "/usr/lib/jvm/java-1.11.0-openjdk-amd64"  # Ensure this matches the Java version used in Hadoop
     namenode_hostname: "Master1"
+    spark_history_provider: "org.apache.spark.deploy.history.FsHistoryProvider"
     spark_driver_memory: "1g"
     spark_yarn_am_memory: "512m"
     spark_executor_memory: "512m"
