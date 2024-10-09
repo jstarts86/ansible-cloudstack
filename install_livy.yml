@@ -1,0 +1,47 @@
+---
+- name: Install and Configure Livy
+  hosts: hadoop_namenode
+  become: true
+  vars:
+    livy_version: "apache-livy-0.8.0-incubating_2.12-bin"
+    livy_home: "/opt/livy"
+    spark_home: "/usr/local/spark"
+    java_home: "/usr/lib/jvm/java-1.11.0-openjdk-amd64"
+
+  tasks:
+    - name: Download Livy
+      get_url:
+        url: "https://dlcdn.apache.org/incubator/livy/0.8.0-incubating/apache-livy-0.8.0-incubating_2.12-bin.zip"
+        dest: "/tmp/{{ livy_version }}.zip"
+
+    - name: Extract Livy
+      unarchive:
+        src: "/tmp/{{ livy_version }}.zip"
+        dest: "/opt/"
+        remote_src: yes
+        creates: "{{ livy_home }}"
+
+    - name: Create Livy log directory
+      file:
+        path: "{{ livy_home }}/logs"
+        state: directory
+        owner: ubuntu
+        mode: '0755'
+
+    - name: Set Livy environment variables
+      template:
+        src: "/templates/livy/livy-env.sh.j2"
+        dest: "{{ livy_home }}/conf/livy-env.sh"
+        mode: '0755'
+
+    - name: Copy Livy configuration
+      template:
+        src: "/templates/livy/livy.conf.j2"
+        dest: "{{ livy_home }}/conf/livy.conf"
+        mode: '0644'
+
+    - name: Start Livy without system service
+      shell: "{{ livy_home }}/bin/livy-server start"
+      args:
+        chdir: "{{ livy_home }}"
+      become: yes
