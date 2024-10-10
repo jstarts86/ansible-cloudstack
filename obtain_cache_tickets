@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# HDFS kinit commands
+export KRB5CCNAME=/tmp/krb5cc_hdfs_knox
+kinit -kt /home/ubuntu/keytabs/hdfs.keytab hdfs/Knox@CS2CLOUD.INTERNAL
+
+export KRB5CCNAME=/tmp/krb5cc_hdfs_master1
+kinit -kt /home/ubuntu/keytabs/hdfs.keytab hdfs/Master1@CS2CLOUD.INTERNAL
+
+export KRB5CCNAME=/tmp/krb5cc_hdfs_slave1
+kinit -kt /home/ubuntu/keytabs/hdfs.keytab hdfs/Slave1@CS2CLOUD.INTERNAL
+
+export KRB5CCNAME=/tmp/krb5cc_hdfs_slave2
+kinit -kt /home/ubuntu/keytabs/hdfs.keytab hdfs/Slave2@CS2CLOUD.INTERNAL
+
+# YARN kinit commands
+export KRB5CCNAME=/tmp/krb5cc_yarn_knox
+kinit -kt /home/ubuntu/keytabs/yarn.keytab yarn/Knox@CS2CLOUD.INTERNAL
+
+export KRB5CCNAME=/tmp/krb5cc_yarn_master1
+kinit -kt /home/ubuntu/keytabs/yarn.keytab yarn/Master1@CS2CLOUD.INTERNAL
+
+export KRB5CCNAME=/tmp/krb5cc_yarn_slave1
+kinit -kt /home/ubuntu/keytabs/yarn.keytab yarn/Slave1@CS2CLOUD.INTERNAL
+
+export KRB5CCNAME=/tmp/krb5cc_yarn_slave2
+kinit -kt /home/ubuntu/keytabs/yarn.keytab yarn/Slave2@CS2CLOUD.INTERNAL
+
+# HTTP kinit commands
+export KRB5CCNAME=/tmp/krb5cc_http_knox
+kinit -kt /home/ubuntu/keytabs/HTTP.keytab HTTP/Knox@CS2CLOUD.INTERNAL
+
+export KRB5CCNAME=/tmp/krb5cc_http_master1
+kinit -kt /home/ubuntu/keytabs/HTTP.keytab HTTP/Master1@CS2CLOUD.INTERNAL
+
+export KRB5CCNAME=/tmp/krb5cc_http_slave1
+kinit -kt /home/ubuntu/keytabs/HTTP.keytab HTTP/Slave1@CS2CLOUD.INTERNAL
+
+export KRB5CCNAME=/tmp/krb5cc_http_slave2
+kinit -kt /home/ubuntu/keytabs/HTTP.keytab HTTP/Slave2@CS2CLOUD.INTERNAL
+
+# Knox kinit commands
+export KRB5CCNAME=/tmp/krb5cc_knox_knox
+kinit -kt /home/ubuntu/keytabs/knox.keytab knox/Knox@CS2CLOUD.INTERNAL
+
+export KRB5CCNAME=/tmp/krb5cc_knox_master1
+kinit -kt /home/ubuntu/keytabs/knox.keytab knox/Master1@CS2CLOUD.INTERNAL
+
+export KRB5CCNAME=/tmp/krb5cc_knox_slave1
+kinit -kt /home/ubuntu/keytabs/knox.keytab knox/Slave1@CS2CLOUD.INTERNAL
+
+export KRB5CCNAME=/tmp/krb5cc_knox_slave2
+kinit -kt /home/ubuntu/keytabs/knox.keytab knox/Slave2@CS2CLOUD.INTERNAL
+
+# Livy kinit commands
+export KRB5CCNAME=/tmp/krb5cc_livy_knox
+kinit -kt /home/ubuntu/keytabs/livy.keytab livy/Knox@CS2CLOUD.INTERNAL
+
+export KRB5CCNAME=/tmp/krb5cc_livy_master1
+kinit -kt /home/ubuntu/keytabs/livy.keytab livy/Master1@CS2CLOUD.INTERNAL
+
+export KRB5CCNAME=/tmp/krb5cc_livy_slave1
+kinit -kt /home/ubuntu/keytabs/livy.keytab livy/Slave1@CS2CLOUD.INTERNAL
+
+export KRB5CCNAME=/tmp/krb5cc_livy_slave2
+kinit -kt /home/ubuntu/keytabs/livy.keytab livy/Slave2@CS2CLOUD.INTERNAL
