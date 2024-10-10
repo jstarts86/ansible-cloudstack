@@ -20,12 +20,12 @@
         <value>{{ kerberos_realm }}</value>
     </property>
     <property>
-        <name>dfs.web.authentication.kerberos.princpal</name>
-        <value>HTTP/{{ kerberos_realm }}</value>
+        <name>dfs.web.authentication.kerberos.principal</name>
+        <value>HTTP/{{ ansible_host }}@{{ kerberos_realm }}</value>
     </property>
     <property>
-        <name>dfs.web.authentication.kerberos.princpal</name>
-        <value>HTTP/{{ kerberos_realm }}</value>
+        <name>dfs.web.authentication.kerberos.principal</name>
+        <value>HTTP/{{ ansible_host }}@{{ kerberos_realm }}</value>
     </property>
 
     <property>

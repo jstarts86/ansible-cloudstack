@@ -1,6 +1,6 @@
 ---
 - name: Install and Configure Hadoop
-  hosts: all
+  hosts: hadoop_cluster
   become: true
   vars:
     hadoop_version: "hadoop-3.3.6"
