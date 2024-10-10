@@ -38,25 +38,22 @@
     <name>dfs.block.access.token.enable</name>
     <value>true</value>
   </property>
-
-    <property>
-        <name>dfs.datanode.address</name>
-        <value>0.0.0.0:10040</value>
-    </property>
-
-    <property>
-        <name>dfs.datanode.http.address</name>
-        <value>0.0.0.0:10060</value>
-    </property>
-
-    <property>
-        <name>dfs.datanode.https.address</name>
-        <value>0.0.0.0:10070</value>
-    </property>
-    <property>
-        <name>dfs.data.transfer.protection</name>
-        <value>authentication</value> <!-- Or 'privacy' if encryption is required -->
-    </property>
+  <property>
+    <name>dfs.datanode.data.dir.perm</name>
+    <value>700</value>
+  </property>
+  <property>
+    <name>dfs.datanode.address</name>
+    <value>0.0.0.0:1004</value>
+  </property>
+  <property>
+    <name>dfs.datanode.http.address</name>
+    <value>0.0.0.0:1006</value>
+  </property>
+  <property>
+    <name>dfs.datanode.https.address</name>
+    <value>0.0.0.0:9865</value>
+  </property>
   {% endif %}
 </configuration>
 
