@@ -19,33 +19,10 @@
     yarn_nodemanager_vmem_check_enabled: "false"
     hadoop_security_authentication: "kerberos"
     hadoop_security_authorization_bool: "true"
-    yarn_token_renew_interval: "3600000"
-    yarn_token_max_lifetime: "604800000"
     namenode_hostname: "Master1"
+    hdfs_keytab_file_path: "/home/ubuntu/keytabs/hdfs.keytab"
+  
   tasks:
-    - name: Install necessary packages
-      apt:
-        name:
-          - wget
-          - tar
-        state: present
-        update_cache: yes
-
-    - name: Download Hadoop
-      get_url:
-        url: "https://downloads.apache.org/hadoop/common/{{ hadoop_version }}/{{ hadoop_version }}.tar.gz"
-        dest: "/tmp/{{ hadoop_version }}.tar.gz"
-
-    - name: Extract Hadoop
-      unarchive:
-        src: "/tmp/{{ hadoop_version }}.tar.gz"
-        dest: "/usr/local"
-        remote_src: yes
-        creates: "/usr/local/{{ hadoop_version }}"
-
-    - name: Rename Hadoop directory
-      command: mv /usr/local/{{ hadoop_version }} /usr/local/hadoop
-
     - name: Ensure /etc/profile.d/ directory exists
       file:
         path: /etc/profile.d
@@ -96,7 +73,8 @@
         owner: ubuntu
         group: ubuntu
         mode: '0644'
-    # # Separate play for formatting NameNode
+
+# Separate play for formatting NameNode
     # - name: Format the HDFS NameNode
     #   hosts: Master1
     #   become: true

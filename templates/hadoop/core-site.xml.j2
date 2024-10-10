@@ -11,5 +11,36 @@
         <name>hadoop.proxyuser.knox.hosts</name>
         <value>Knox</value>
     </property>
+    <property>
+        <name>hadoop.security.authentication</name>
+        <value>{{ kerberos_realm }}</value>
+    </property>
+    <property>
+        <name>hadoop.security.authorization</name>
+        <value>{{ kerberos_realm }}</value>
+    </property>
+    <property>
+        <name>dfs.web.authentication.kerberos.princpal</name>
+        <value>HTTP/{{ kerberos_realm }}</value>
+    </property>
+    <property>
+        <name>dfs.web.authentication.kerberos.princpal</name>
+        <value>HTTP/{{ kerberos_realm }}</value>
+    </property>
+
+    <property>
+        <name>dfs.namenode.keytab.file</name>
+        <value>{{ hdfs_keytab_file_path }}</value>
+    </property>
+
+    <property>
+        <name>dfs.datanode.keytab.file</name>
+        <value>{{ hdfs_keytab_file_path }}</value>
+    </property>
+
+    <property>
+        <name>dfs.secondary.namenode.keytab.file</name>
+        <value>{{ hdfs_keytab_file_path }}</value>
+    </property>
 </configuration>
 

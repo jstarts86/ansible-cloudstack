@@ -15,5 +15,21 @@
         <name>webhdfs.enabled</name>
         <value>true</value>
     </property>
+    <property>
+        <name>dfs.namenode.kerberos.principal</name>
+        <value>hdfs/{{ ansible_hostname }}@{{realm}}</value>
+    </property>
+    <property>
+        <name>dfs.datanode.kerberos.principal</name>
+        <value>hdfs/{{ ansible_hostname }}@{{ realm }}</value>
+    </property>
+    <property>
+        <name>dfs.secondary.kerberos.principal</name>
+        <value>hdfs/{{ ansible_hostname }}@{{ realm }}</value>
+    </property>
+    <property>
+        <name>dfs.secondary.kerberos.principal</name>
+        <value>http/{{ ansible_hostname }}@{{ realm }}</value>
+    </property>
 </configuration>
 

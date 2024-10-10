@@ -27,4 +27,48 @@
         <name>yarn.nodemanager.vmem-check-enabled</name>
         <value>{{ yarn_nodemanager_vmem_check_enabled }}</value>
     </property>
+    <property>
+        <name>yarn.resourcemanager.principal</name>
+        <value>yarn/{{ ansible_hostname }}@{{ kerberos_realm }}</value>
+    </property>
+
+    <property>
+        <name>yarn.nodemanager.principal</name>
+        <value>yarn/{{ ansible_hostname }}@{{ kerberos_realm }}</value>
+    </property>
+
+    <property>
+        <name>yarn.resourcemanager.keytab</name>
+        <value>{{ yarn_keytab_file_path }}</value>
+    </property>
+
+    <property>
+        <name>yarn.nodemanager.keytab</name>
+        <value>{{ yarn_keytab_file_path }}</value>
+    </property>
+
+    <property>
+        <name>yarn.timeline-service.principal</name>
+        <value>yarn/{{ ansible_hostname }}@{{ kerberos_realm }}</value>
+    </property>
+
+    <property>
+        <name>yarn.timeline-service.keytab</name>
+        <value>{{ yarn_keytab_file_path }}</value>
+    </property>
+
+    <property>
+        <name>yarn.resourcemanager.delegation.token.renew-interval</name>
+        <value>{{ yarn_token_renew_interval }}</value> <!-- Renewal interval in milliseconds (1 hour) -->
+    </property>
+
+    <property>
+        <name>yarn.resourcemanager.delegation.token.max-lifetime</name>
+        <value>{{ yarn_token_max_lifetime }}</value> <!-- Maximum lifetime of a delegation token (7 days) -->
+    </property>
+
+    <property>
+        <name>yarn.nodemanager.keytab.automatic-renewal.enabled</name>
+        <value>true</value>
+    </property>
 </configuration>
