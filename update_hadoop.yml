@@ -19,9 +19,9 @@
     yarn_nodemanager_vmem_check_enabled: "false"
     hadoop_security_authentication: "kerberos"
     hadoop_security_authorization_bool: "true"
+    yarn_token_renew_interval: "3600000"
+    yarn_token_max_lifetime: "604800000"
     namenode_hostname: "Master1"
-    hdfs_keytab_file_path: "/home/ubuntu/keytabs/hdfs.keytab"
-  
   tasks:
     - name: Ensure /etc/profile.d/ directory exists
       file:
@@ -73,8 +73,7 @@
         owner: ubuntu
         group: ubuntu
         mode: '0644'
-
-# Separate play for formatting NameNode
+    # # Separate play for formatting NameNode
     # - name: Format the HDFS NameNode
     #   hosts: Master1
     #   become: true
