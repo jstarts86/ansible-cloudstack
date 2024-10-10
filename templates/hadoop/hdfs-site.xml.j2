@@ -17,19 +17,19 @@
     </property>
     <property>
         <name>dfs.namenode.kerberos.principal</name>
-        <value>hdfs/{{ ansible_hostname }}@{{ kerberos_realm}}</value>
+        <value>hdfs/{{ inventory_hostname }}@{{ kerberos_realm}}</value>
     </property>
     <property>
         <name>dfs.datanode.kerberos.principal</name>
-        <value>hdfs/{{ ansible_hostname }}@{{  kerberos_realm }}</value>
+        <value>hdfs/{{ inventory_hostname }}@{{  kerberos_realm }}</value>
     </property>
     <property>
         <name>dfs.secondary.kerberos.principal</name>
-        <value>hdfs/{{ ansible_hostname }}@{{  kerberos_realm }}</value>
+        <value>hdfs/{{ inventory_hostname }}@{{  kerberos_realm }}</value>
     </property>
     <property>
         <name>dfs.secondary.kerberos.principal</name>
-        <value>http/{{ ansible_hostname }}@{{  kerberos_realm }}</value>
+        <value>http/{{ inventory_hostname }}@{{  kerberos_realm }}</value>
     </property>
 </configuration>
 

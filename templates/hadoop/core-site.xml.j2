@@ -21,11 +21,11 @@
     </property>
     <property>
         <name>dfs.web.authentication.kerberos.principal</name>
-        <value>HTTP/{{ ansible_host }}@{{ kerberos_realm }}</value>
+        <value>HTTP/{{ inventory_hostname }}@{{ kerberos_realm }}</value>
     </property>
     <property>
         <name>dfs.web.authentication.kerberos.principal</name>
-        <value>HTTP/{{ ansible_host }}@{{ kerberos_realm }}</value>
+        <value>HTTP/{{ inventory_hostname }}@{{ kerberos_realm }}</value>
     </property>
 
     <property>
