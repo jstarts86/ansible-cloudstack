@@ -3,5 +3,13 @@
         <name>fs.defaultFS</name>
         <value>hdfs://{{ namenode_hostname }}:9000</value>
     </property>
+    <property>
+        <name>hadoop.proxyuser.knox.groups</name>
+        <value>users</value>
+    </property>
+    <property>
+        <name>hadoop.proxyuser.knox.hosts</name>
+        <value>Knox</value>
+    </property>
 </configuration>
 

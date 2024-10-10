@@ -1,0 +1,28 @@
+---
+- name: Install Python on all Ubuntu hosts
+  hosts: all
+  become: true
+  tasks:
+
+    - name: Update the apt package list
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install Python 3
+      apt:
+        name: python3
+        state: present
+
+    - name: Ensure pip3 is installed
+      apt:
+        name: python3-pip
+        state: present
+
+    - name: Verify Python installation
+      command: python3 --version
+      register: python_version
+
+    - name: Print the Python version
+      debug:
+        msg: "Python version installed: {{ python_version.stdout }}"

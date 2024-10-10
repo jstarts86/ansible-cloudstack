@@ -1,0 +1,15 @@
+- name: Configure bashrc
+  hosts: all
+  become: true
+  vars:
+    hadoop_version: "hadoop-3.3.6"
+    hadoop_home: "/usr/local/hadoop"
+    java_home: "/usr/lib/jvm/java-1.11.0-openjdk-amd64"
+  tasks:
+    - name: Template .bashrc
+      template:
+        src: "templates/bashrc.j2"
+        dest: "/home/ubuntu/.bashrc"
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
