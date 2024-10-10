@@ -24,6 +24,18 @@
         <value>HTTP/{{ inventory_hostname }}@{{ kerberos_realm }}</value>
     </property>
     <property>
+        <name>dfs.namenode.kerberos.principal</name>
+        <value>hdfs/{{ inventory_hostname }}@{{ kerberos_realm}}</value>
+    </property>
+    <property>
+        <name>dfs.datanode.kerberos.principal</name>
+        <value>hdfs/{{ inventory_hostname }}@{{  kerberos_realm }}</value>
+    </property>
+    <property>
+        <name>dfs.secondary.kerberos.principal</name>
+        <value>hdfs/{{ inventory_hostname }}@{{  kerberos_realm }}</value>
+    </property>
+    <property>
         <name>dfs.namenode.keytab.file</name>
         <value>{{ hdfs_keytab_file_path }}</value>
     </property>
