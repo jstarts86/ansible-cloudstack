@@ -1,35 +1,32 @@
+
 <configuration>
-    <property>
-        <name>dfs.namenode.name.dir</name>
-        <value>{{ name_node_dir }}</value>
-    </property>
-    <property>
-        <name>dfs.datanode.data.dir</name>
-        <value>{{ data_node_dir }}</value>
-    </property>
-    <property>
-        <name>dfs.replication</name>
-        <value>{{ replication_factor }}</value>
-    </property>
-    <property>
-        <name>webhdfs.enabled</name>
-        <value>true</value>
-    </property>
-    <property>
-        <name>dfs.namenode.kerberos.principal</name>
-        <value>hdfs/{{ inventory_hostname }}@{{ kerberos_realm}}</value>
-    </property>
-    <property>
-        <name>dfs.datanode.kerberos.principal</name>
-        <value>hdfs/{{ inventory_hostname }}@{{  kerberos_realm }}</value>
-    </property>
-    <property>
-        <name>dfs.secondary.kerberos.principal</name>
-        <value>hdfs/{{ inventory_hostname }}@{{  kerberos_realm }}</value>
-    </property>
-    <property>
-        <name>dfs.secondary.kerberos.principal</name>
-        <value>http/{{ inventory_hostname }}@{{  kerberos_realm }}</value>
-    </property>
+  {% if 'hadoop_namenode' in group_names %}
+  <property>
+      <name>dfs.namenode.name.dir</name>
+      <value>{{ name_node_dir }}</value>
+  </property>
+  <property>
+      <name>dfs.namenode.kerberos.principal</name>
+      <value>hdfs/{{ inventory_hostname }}@{{ kerberos_realm }}</value>
+  </property>
+  {% endif %}
+
+  {% if 'hadoop_datanode' in group_names %}
+  <property>
+      <name>dfs.datanode.data.dir</name>
+      <value>{{ data_node_dir }}</value>
+  </property>
+  <property>
+      <name>dfs.datanode.kerberos.principal</name>
+      <value>hdfs/{{ inventory_hostname }}@{{ kerberos_realm }}</value>
+  </property>
+  {% endif %}
+
+  {% if 'hadoop_namenode' in group_names or 'hadoop_datanode' in group_names %}
+  <property>
+      <name>dfs.web.authentication.kerberos.principal</name>
+      <value>HTTP/{{ inventory_hostname }}@{{ kerberos_realm }}</value>
+  </property>
+  {% endif %}
 </configuration>
 
