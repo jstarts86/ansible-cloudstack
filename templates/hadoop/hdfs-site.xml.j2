@@ -38,6 +38,19 @@
       <name>dfs.web.authentication.kerberos.keytab</name>
       <value>{{ http_keytab_file_path }}</value>
   </property>
+    <property>
+        <name>dfs.namenode.keytab.file</name>
+        <value>{{ hdfs_keytab_file_path }}</value>
+    </property>
+    <property>
+        <name>dfs.datanode.keytab.file</name>
+        <value>{{ hdfs_keytab_file_path }}</value>
+    </property>
+
+    <property>
+        <name>dfs.secondary.namenode.keytab.file</name>
+        <value>{{ hdfs_keytab_file_path }}</value>
+    </property>
   <property>
     <name>dfs.block.access.token.enable</name>
     <value>true</value>
