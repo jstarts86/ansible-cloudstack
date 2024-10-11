@@ -44,6 +44,8 @@
         - { src: 'hdfs-site.xml.j2', dest: 'hdfs-site.xml' }
         - { src: 'yarn-site.xml.j2', dest: 'yarn-site.xml' }
         - { src: 'mapred-site.xml.j2', dest: 'mapred-site.xml' }
+        - { src: 'ssl-client.xml.j2', dest: 'ssl-client.xml' }
+        - { src: 'ssl-server.xml.j2', dest: 'ssl-server.xml' }
 
     - name: Template Hadoop environment file
       template:
