@@ -24,6 +24,10 @@
         <value>HTTP/{{ inventory_hostname }}@{{ kerberos_realm }}</value>
     </property>
     <property>
+        <name>dfs.web.authentication.kerberos.keytab</name>
+        <value>{{ http_keytab_file_path }}</value>
+    </property>
+    <property>
         <name>dfs.namenode.keytab.file</name>
         <value>{{ hdfs_keytab_file_path }}</value>
     </property>
