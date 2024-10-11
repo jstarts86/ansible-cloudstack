@@ -37,10 +37,14 @@
   <property>
       <name>dfs.web.authentication.kerberos.keytab</name>
       <value>{{ http_keytab_file_path }}</value>
-  </property>
+  </property
   <property>
     <name>dfs.block.access.token.enable</name>
     <value>true</value>
+  </property>
+  <property>
+    <name>dfs.http.policy</name>
+    <value>HTTPS_ONLY</value>
   </property>
   <property>
     <name>dfs.datanode.data.dir.perm</name>
