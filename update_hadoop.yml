@@ -1,0 +1,117 @@
+---
+- name: Update Hadoop
+  hosts: all
+  become: true
+  vars:
+    hadoop_version: "hadoop-3.3.6"  # Update this to the new version you want to install
+    hadoop_home: "/usr/local/hadoop"
+    hadoop_tmp: "/tmp/{{ hadoop_version }}.tar.gz"
+  
+  tasks:
+    - name: Install necessary packages
+      apt:
+        name:
+          - wget
+          - tar
+        state: present
+        update_cache: yes
+
+    - name: Stop Hadoop services
+      service:
+        name: hadoop-yarn-resourcemanager
+        state: stopped
+
+    - name: Stop Node Manager
+      service:
+        name: hadoop-yarn-nodemanager
+        state: stopped
+
+    - name: Backup current Hadoop directory
+      command: mv {{ hadoop_home }} {{ hadoop_home }}_backup_{{ ansible_date_time.iso8601 }}
+      when: ansible_date_time.iso8601 is defined
+
+    - name: Download Hadoop
+      get_url:
+        url: "https://downloads.apache.org/hadoop/common/{{ hadoop_version }}/{{ hadoop_version }}.tar.gz"
+        dest: "{{ hadoop_tmp }}"
+
+    - name: Extract Hadoop
+      unarchive:
+        src: "{{ hadoop_tmp }}"
+        dest: "/usr/local"
+        remote_src: yes
+        creates: "/usr/local/{{ hadoop_version }}"
+
+    - name: Rename new Hadoop directory
+      command: mv /usr/local/{{ hadoop_version }} /usr/local/hadoop
+      when: "'/usr/local/{{ hadoop_version }}' is exists"
+
+    - name: Ensure /etc/profile.d/ directory exists
+      file:
+        path: /etc/profile.d
+        state: directory
+        mode: '0755'
+
+    - name: Set Hadoop environment variables
+      template:
+        src: "templates/hadoop/hadoop.sh.j2"
+        dest: "/etc/profile.d/hadoop.sh"
+        mode: '0755'
+
+    - name: Template Hadoop configuration files
+      template:
+        src: "templates/hadoop/{{ item.src }}"
+        dest: "{{ hadoop_home }}/etc/hadoop/{{ item.dest }}"
+      loop:
+        - { src: 'core-site.xml.j2', dest: 'core-site.xml' }
+        - { src: 'hdfs-site.xml.j2', dest: 'hdfs-site.xml' }
+        - { src: 'yarn-site.xml.j2', dest: 'yarn-site.xml' }
+        - { src: 'mapred-site.xml.j2', dest: 'mapred-site.xml' }
+
+    - name: Template Hadoop environment file
+      template:
+        src: "templates/hadoop/hadoop-env.sh.j2"
+        dest: "{{ hadoop_home }}/etc/hadoop/hadoop-env.sh"
+
+    - name: Template .profile
+      template:
+        src: "templates/profile.j2"
+        dest: "/home/ubuntu/.profile"
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
+    - name: Template .bashrc
+      template:
+        src: "templates/bashrc.j2"
+        dest: "/home/ubuntu/.bashrc"
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
+    - name: Template workers file
+      template:
+        src: "templates/hadoop/workers.j2"
+        dest: "{{ hadoop_home }}/etc/hadoop/workers"
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
+    - name: Start Hadoop services
+      service:
+        name: hadoop-yarn-resourcemanager
+        state: started
+
+    - name: Start Node Manager
+      service:
+        name: hadoop-yarn-nodemanager
+        state: started
+
+# Separate play for formatting NameNode if needed
+- name: Format the HDFS NameNode (if necessary)
+  hosts: Master1
+  become: true
+  tasks:
+    - name: Run 'hdfs namenode -format' on NameNode (if necessary)
+      command: hdfs namenode -format
+      when: "ansible_date_time.iso8601 is defined"  # Only format if necessary
