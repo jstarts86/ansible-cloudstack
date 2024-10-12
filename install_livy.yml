@@ -30,13 +30,13 @@
 
     - name: Set Livy environment variables
       template:
-        src: "/templates/livy/livy-env.sh.j2"
+        src: "templates/livy/livy-env.sh.j2"
         dest: "{{ livy_home }}/conf/livy-env.sh"
         mode: '0755'
 
     - name: Copy Livy configuration
       template:
-        src: "/templates/livy/livy.conf.j2"
+        src: "templates/livy/livy.conf.j2"
         dest: "{{ livy_home }}/conf/livy.conf"
         mode: '0644'
 
