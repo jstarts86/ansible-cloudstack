@@ -3,22 +3,8 @@
   hosts: all
   become: true
   vars:
-    vars:
-    hadoop_version: "hadoop-3.3.6"
+    hadoop_version: "hadoop-3.3.6"  # Keep this as the existing version
     hadoop_home: "/usr/local/hadoop"
-    java_home: "/usr/lib/jvm/java-1.11.0-openjdk-amd64"
-    name_node_dir: "/home/ubuntu/data/nameNode"
-    data_node_dir: "/home/ubuntu/data/dataNode"
-    yarn_app_mapreduce_resource_mb: "512"
-    yarn_app_map_resource_mb: "256"
-    yarn_app_reduce_resource_mb: "256"
-    replication_factor: "1"
-    yarn_acl_enable: "0"
-    yarn_nodemanager_resource_memory_mb: "2560"
-    yarn_scheduler_maximum_allocation_mb: "2048"
-    yarn_scheduler_minimum_allocation_mb: "512"
-    yarn_nodemanager_vmem_check_enabled: "false"
-    namenode_hostname: "Master1"
 
   tasks:
     - name: Ensure necessary packages are installed (if needed)
@@ -28,10 +14,6 @@
           - tar
         state: present
         update_cache: yes
-
-    - name: Backup current Hadoop directory
-      command: mv {{ hadoop_home }} {{ hadoop_home }}_backup_{{ ansible_date_time.iso8601 }}
-      when: ansible_date_time.iso8601 is defined
 
     - name: Ensure /etc/profile.d/ directory exists
       file:
