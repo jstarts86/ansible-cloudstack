@@ -1,14 +1,13 @@
 ---
-- name: Update Hadoop
+- name: Update Hadoop Configuration
   hosts: all
   become: true
   vars:
-    hadoop_version: "hadoop-3.3.6"  # Update this to the new version you want to install
+    hadoop_version: "hadoop-3.3.6"  # Keep this as the existing version
     hadoop_home: "/usr/local/hadoop"
-    hadoop_tmp: "/tmp/{{ hadoop_version }}.tar.gz"
-  
+
   tasks:
-    - name: Install necessary packages
+    - name: Ensure necessary packages are installed (if needed)
       apt:
         name:
           - wget
@@ -16,35 +15,9 @@
         state: present
         update_cache: yes
 
-    - name: Stop Hadoop services
-      service:
-        name: hadoop-yarn-resourcemanager
-        state: stopped
-
-    - name: Stop Node Manager
-      service:
-        name: hadoop-yarn-nodemanager
-        state: stopped
-
     - name: Backup current Hadoop directory
       command: mv {{ hadoop_home }} {{ hadoop_home }}_backup_{{ ansible_date_time.iso8601 }}
       when: ansible_date_time.iso8601 is defined
-
-    - name: Download Hadoop
-      get_url:
-        url: "https://downloads.apache.org/hadoop/common/{{ hadoop_version }}/{{ hadoop_version }}.tar.gz"
-        dest: "{{ hadoop_tmp }}"
-
-    - name: Extract Hadoop
-      unarchive:
-        src: "{{ hadoop_tmp }}"
-        dest: "/usr/local"
-        remote_src: yes
-        creates: "/usr/local/{{ hadoop_version }}"
-
-    - name: Rename new Hadoop directory
-      command: mv /usr/local/{{ hadoop_version }} /usr/local/hadoop
-      when: "'/usr/local/{{ hadoop_version }}' is exists"
 
     - name: Ensure /etc/profile.d/ directory exists
       file:
@@ -96,16 +69,6 @@
         owner: ubuntu
         group: ubuntu
         mode: '0644'
-
-    - name: Start Hadoop services
-      service:
-        name: hadoop-yarn-resourcemanager
-        state: started
-
-    - name: Start Node Manager
-      service:
-        name: hadoop-yarn-nodemanager
-        state: started
 
 # Separate play for formatting NameNode if needed
 - name: Format the HDFS NameNode (if necessary)
