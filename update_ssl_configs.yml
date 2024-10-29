@@ -13,9 +13,9 @@
     owner: ubuntu
     mode: '0600'
   with_items:
-    - "files/STAR.handong.edu.crt"
-    - "files/STAR.handong.edu.key"
-    - "files/chainca.crt"
+    - "secure_files/ssl/STAR.handong.edu.crt"
+    - "secure_files/ssl/STAR.handong.edu.key"
+    - "secure_files/ssl/chainca.crt"
 
 - name: Configure HDFS for SSL
   template:
