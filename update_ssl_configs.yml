@@ -54,15 +54,13 @@
       template:
         src: templates/livy/livy.conf.j2
         dest: "/opt/livy/conf/livy.conf"
-      when: "'knox' in group_names"
-      notify: restart_livy
+      when: "'livy' in group_names"
 
     - name: Configure Knox for SSL
       template:
         src: templates/knox/gateway-site.xml.j2
         dest: "{{ knox_home }}/conf/gateway-site.xml"
       when: "'knox' in group_names"
-      notify: restart_knox
 
   # handlers:
   #   - name: restart_hdfs
