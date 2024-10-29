@@ -29,7 +29,6 @@
         src: templates/hadoop/hdfs-site.xml.j2
         dest: "/usr/local/hadoop/etc/hadoop/hdfs-site.xml"
       when: "'hadoop_cluster' in group_names"
-      notify: restart_hdfs
 
     - name: Deploy SSL client configuration for HDFS
       template:
