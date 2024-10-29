@@ -1,8 +1,11 @@
 <configuration>
+    <!-- Set the default file system URI -->
     <property>
         <name>fs.defaultFS</name>
         <value>hdfs://{{ namenode_hostname }}:9000</value>
     </property>
+
+    <!-- Knox Proxy User Configuration -->
     <property>
         <name>hadoop.proxyuser.knox.groups</name>
         <value>users</value>
@@ -11,6 +14,8 @@
         <name>hadoop.proxyuser.knox.hosts</name>
         <value>Knox</value>
     </property>
+
+    <!-- Enable Kerberos authentication -->
     <property>
         <name>hadoop.security.authentication</name>
         <value>{{ hadoop_security_authentication }}</value>
@@ -19,6 +24,8 @@
         <name>hadoop.security.authorization</name>
         <value>{{ hadoop_security_authorization_bool }}</value>
     </property>
+
+    <!-- Kerberos Principal and Keytab for Web Authentication -->
     <property>
         <name>dfs.web.authentication.kerberos.principal</name>
         <value>HTTP/{{ inventory_hostname }}@{{ kerberos_realm }}</value>
@@ -28,23 +35,39 @@
         <value>{{ http_keytab_file_path }}</value>
     </property>
 
+    <!-- Kerberos Keytab Files for NameNode and DataNode -->
     <property>
         <name>dfs.namenode.keytab.file</name>
         <value>{{ hdfs_keytab_file_path }}</value>
     </property>
+    <property>
+        <name>dfs.datanode.keytab.file</name>
+        <value>{{ hdfs_keytab_file_path }}</value>
+    </property>
+    <property>
+        <name>dfs.secondary.namenode.keytab.file</name>
+        <value>{{ hdfs_keytab_file_path }}</value>
+    </property>
 
+    <!-- Enable SSL for Hadoop -->
     <property>
         <name>hadoop.ssl.enabled</name>
         <value>true</value>
     </property>
+
+    <!-- Set HTTPS-Only Policy -->
     <property>
         <name>dfs.http.policy</name>
         <value>HTTPS_ONLY</value>
     </property>
+
+    <!-- Specify the HTTPS Port -->
     <property>
         <name>dfs.https.port</name>
         <value>9871</value>
     </property>
+
+    <!-- Keystore and Truststore for SSL Connections -->
     <property>
         <name>dfs.client.https.keystore.resource</name>
         <value>ssl-server.xml</value>
@@ -54,13 +77,19 @@
         <value>ssl-client.xml</value>
     </property>
     <property>
-        <name>dfs.datanode.keytab.file</name>
-        <value>{{ hdfs_keytab_file_path }}</value>
+        <name>dfs.https.server.keystore.resource</name>
+        <value>{{ ssl_keystore_path }}/STAR.handong.edu.crt</value>
     </property>
 
+    <!-- Private Key (if needed for secure data transfer) -->
     <property>
-        <name>dfs.secondary.namenode.keytab.file</name>
-        <value>{{ hdfs_keytab_file_path }}</value>
+        <name>dfs.https.server.keystore.keypassword</name>
+        <value></value>
+    </property>
+
+    <!-- Corrected Truststore Location -->
+    <property>
+        <name>ssl.server.truststore.location</name> <!-- Corrected property name -->
+        <value>{{ ssl_keystore_path }}/chainca.crt</value>
     </property>
 </configuration>
-

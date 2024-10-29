@@ -64,6 +64,26 @@
     <value>HTTPS_ONLY</value>
   </property>
   <property>
+    <name>dfs.http.policy</name>
+    <value>HTTPS_ONLY</value>
+  </property>
+  <property>
+    <name>dfs.https.server.keystore.resource</name>
+    <value>{{ ssl_keystore_path }}/STAR.handong.edu.crt</value>
+  </property>
+  <property>
+    <name>ssl.server.keystore.keypassword</name>
+    <value></value>
+  </property>
+  <property>
+    <name>ssl.server.keystore.key</name>
+    <value>{{ ssl_keystore_path }}/STAR.handong.edu.key</value>
+  </property>
+  <property>
+    <name>ssl.server.truststore.location</name>
+    <value>{{ ssl_keystore_path }}/chainca.crt</value>
+  </property>
+  <property>
     <name>dfs.datanode.data.dir.perm</name>
     <value>700</value>
   </property>
