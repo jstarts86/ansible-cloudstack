@@ -95,10 +95,10 @@
         mode: '0644'
 
 # Separate play for formatting NameNode
-- name: Format the HDFS NameNode
-  hosts: Master1
-  become: true
-  tasks:
-    - name: Run 'hdfs namenode -format' on NameNode
-      command: hdfs namenode -format
+#- name: Format the HDFS NameNode
+  # hosts: Master1
+  #  become: true
+  #  tasks:
+  #  - name: Run 'hdfs namenode -format' on NameNode
+  #    command: hdfs namenode -format
 

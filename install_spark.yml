@@ -59,3 +59,4 @@
         - { src: 'spark-defaults.conf.j2', dest: 'spark-defaults.conf' }
         - { src: 'spark-env.sh.j2', dest: 'spark-env.sh' }
 
+

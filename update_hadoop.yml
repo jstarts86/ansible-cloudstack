@@ -3,9 +3,21 @@
   hosts: all
   become: true
   vars:
-    hadoop_version: "hadoop-3.3.6"  # Keep this as the existing version
+    hadoop_version: "hadoop-3.3.6"
     hadoop_home: "/usr/local/hadoop"
-
+    java_home: "/usr/lib/jvm/java-1.11.0-openjdk-amd64"
+    name_node_dir: "/home/ubuntu/data/nameNode"
+    data_node_dir: "/home/ubuntu/data/dataNode"
+    yarn_app_mapreduce_resource_mb: "512"
+    yarn_app_map_resource_mb: "256"
+    yarn_app_reduce_resource_mb: "256"
+    replication_factor: "1"
+    yarn_acl_enable: "0"
+    yarn_nodemanager_resource_memory_mb: "2560"
+    yarn_scheduler_maximum_allocation_mb: "2048"
+    yarn_scheduler_minimum_allocation_mb: "512"
+    yarn_nodemanager_vmem_check_enabled: "false"
+    namenode_hostname: "Master1"
   tasks:
     - name: Ensure necessary packages are installed (if needed)
       apt:
@@ -18,6 +30,12 @@
     - name: Ensure /etc/profile.d/ directory exists
       file:
         path: /etc/profile.d
+        state: directory
+        mode: '0755'
+
+    - name: Ensure Hadoop configuration directory exists
+      file:
+        path: "{{ hadoop_home }}/etc/hadoop"
         state: directory
         mode: '0755'
 
@@ -67,10 +85,10 @@
         mode: '0644'
 
 # Separate play for formatting NameNode if needed
-- name: Format the HDFS NameNode (if necessary)
-  hosts: Master1
-  become: true
-  tasks:
-    - name: Run 'hdfs namenode -format' on NameNode (if necessary)
-      command: hdfs namenode -format
-      when: "ansible_date_time.iso8601 is defined"  # Only format if necessary
+#- name: Format the HDFS NameNode (if necessary)
+# hosts: Master1
+# become: true
+# tasks:
+#   - name: Run 'hdfs namenode -format' on NameNode (if necessary)
+#     command: hdfs namenode -format
+#     when: "ansible_date_time.iso8601 is defined"  # Only format if necessary
