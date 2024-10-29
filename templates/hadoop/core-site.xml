@@ -49,14 +49,14 @@
         <name>dfs.https.port</name>
         <value>9871</value>
     </property>
-    <property>
-        <name>dfs.client.https.keystore.resource</name>
-        <value>ssl-server.xml</value>
-    </property>
-    <property>
-        <name>dfs.client.https.truststore.resource</name>
-        <value>ssl-client.xml</value>
-    </property>
+    <!-- <property> -->
+    <!--     <name>dfs.client.https.keystore.resource</name> -->
+    <!--     <value>ssl-server.xml</value> -->
+    <!-- </property> -->
+    <!-- <property> -->
+    <!--     <name>dfs.client.https.truststore.resource</name> -->
+    <!--     <value>ssl-client.xml</value> -->
+    <!-- </property> -->
     <property>
         <name>dfs.datanode.keytab.file</name>
         <value>{{ hdfs_keytab_file_path }}</value>
