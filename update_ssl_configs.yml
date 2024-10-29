@@ -27,20 +27,20 @@
     - name: Configure HDFS for SSL
       template:
         src: templates/hadoop/hdfs-site.xml.j2
-        dest: $HADOOP_CONF_DIR/hdfs-site.xml
+        dest: "$HADOOP_CONF_DIR/hdfs-site.xml"
       when: "'hadoop_cluster' in group_names"
       notify: restart_hdfs
 
     - name: Deploy SSL client configuration for HDFS
       template:
         src: templates/hadoop/ssl-client.xml.j2
-        dest: $HADOOP_CONF_DIR/ssl-client.xml
+        dest: "$HADOOP_CONF_DIR/ssl-client.xml"
       when: "'hadoop_cluster' in group_names"
 
     - name: Deploy SSL server configuration for HDFS
       template:
         src: templates/hadoop/ssl-server.xml.j2
-        dest: $HADOOP_CONF_DIR/ssl-server.xml
+        dest: "$HADOOP_CONF_DIR/ssl-server.xml"
       when: "'hadoop_cluster' in group_names"
 
     - name: Configure Spark for SSL
@@ -53,7 +53,7 @@
     - name: Configure Livy for SSL
       template:
         src: templates/livy/livy.conf.j2
-        dest: /opt/livy/conf/livy.conf
+        dest: "/opt/livy/conf/livy.conf"
       when: "'knox' in group_names"
       notify: restart_livy
 
