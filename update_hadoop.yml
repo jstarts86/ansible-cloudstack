@@ -18,7 +18,7 @@
     yarn_scheduler_minimum_allocation_mb: "512"
     yarn_nodemanager_vmem_check_enabled: "false"
     hadoop_security_authentication: "kerberos"
-    hadoop_security_authorization_bool: "true"
+    hadoop_security_authorization_bool: "false"
     yarn_token_renew_interval: "3600000"
     yarn_token_max_lifetime: "604800000"
     namenode_hostname: "Master1"
