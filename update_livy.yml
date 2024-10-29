@@ -1,0 +1,23 @@
+---
+- name: Install and Configure Livy
+  hosts: hadoop_namenode
+  become: true
+  vars:
+    livy_version: "apache-livy-0.8.0-incubating_2.12-bin"
+    livy_home: "/opt/livy"
+    spark_home: "/usr/local/spark"
+    java_home: "/usr/lib/jvm/java-1.11.0-openjdk-amd64"
+
+  tasks:
+    - name: Set Livy environment variables
+      template:
+        src: "/templates/livy/livy-env.sh.j2"
+        dest: "{{ livy_home }}/conf/livy-env.sh"
+        mode: '0755'
+
+    - name: Copy Livy configuration
+      template:
+        src: "/templates/livy/livy.conf.j2"
+        dest: "{{ livy_home }}/conf/livy.conf"
+        mode: '0644'
+

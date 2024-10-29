@@ -1,0 +1,57 @@
+---
+- name: Ensure directories for keystores and truststores in /home/ubuntu/
+  file:
+    path: /home/ubuntu/certs
+    state: directory
+    owner: ubuntu
+    mode: '0700'
+  become: yes
+
+- name: Generate keystore on each host
+  command: >
+    keytool -genkeypair -alias {{ inventory_hostname }}
+    -keyalg RSA -keysize 2048
+    -validity 365
+    -keystore /home/ubuntu/certs/keystore.jks
+    -storepass "{{ keystore_password }}"
+    -dname "CN={{ inventory_hostname }}, OU=Cloud, O=Hadoop, L=City, ST=State, C=US"
+  args:
+    creates: /home/ubuntu/certs/keystore.jks
+  become: yes
+
+- name: Export certificate from keystore
+  command: >
+    keytool -export -alias {{ inventory_hostname }}
+    -file /home/ubuntu/certs/{{ inventory_hostname }}.cer
+    -keystore /home/ubuntu/certs/keystore.jks
+    -storepass "{{ keystore_password }}"
+  args:
+    creates: /home/ubuntu/certs/{{ inventory_hostname }}.cer
+  become: yes
+
+- name: Distribute certificates to other hosts
+  fetch:
+    src: /home/ubuntu/certs/{{ inventory_hostname }}.cer
+    dest: certificates/
+    flat: yes
+  become: yes
+
+- name: Copy certificates to /home/ubuntu/certs/ on other hosts
+  copy:
+    src: certificates/{{ item }}.cer
+    dest: /home/ubuntu/certs/
+  with_items:
+    - "{{ groups['hadoop_cluster'] | difference([inventory_hostname]) }}"
+  when: "'{{ item }}.cer' != inventory_hostname + '.cer'"
+  become: yes
+
+- name: Import all certificates into truststore in /home/ubuntu/
+  command: >
+    keytool -import -alias {{ item }}
+    -file /home/ubuntu/certs/{{ item }}.cer
+    -keystore /home/ubuntu/certs/truststore.jks
+    -storepass "{{ truststore_password }}"
+    -noprompt
+  with_items:
+    - "{{ groups['hadoop_cluster'] }}"
+  become: yes
