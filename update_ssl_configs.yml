@@ -1,57 +1,83 @@
 ---
-- name: Ensure certs directory exists
-  file:
-    path: "{{ ssl_keystore_path }}"
-    state: directory
-    owner: ubuntu
-    mode: '0700'
+- name: Update SSL configurations on Hadoop and Spark nodes
+  hosts: all
+  become: yes
+  tasks:
+    - name: Ensure certs directory exists
+      file:
+        path: "{{ ssl_keystore_path }}"
+        state: directory
+        owner: ubuntu
+        mode: '0700'
 
-- name: Copy SSL certificate files to each host
-  copy:
-    src: "{{ item }}"
-    dest: "{{ ssl_keystore_path }}/"
-    owner: ubuntu
-    mode: '0600'
-  with_items:
-    - "secure_files/ssl/STAR.handong.edu.crt"
-    - "secure_files/ssl/STAR.handong.edu.key"
-    - "secure_files/ssl/chainca.crt"
+    - name: Copy SSL certificate files to each host
+      copy:
+        src: "{{ item }}"
+        dest: "{{ ssl_keystore_path }}/"
+        owner: ubuntu
+        mode: '0600'
+      with_items:
+        - "secure_files/ssl/STAR.handong.edu.crt"
+        - "secure_files/ssl/STAR.handong.edu.key"
+        - "secure_files/ssl/chainca.crt"
 
-- name: Configure HDFS for SSL
-  template:
-    src: hdfs-site.xml.j2
-    dest: $HADOOP_CONF_DIR/hdfs-site.xml
-  when: "'hadoop_cluster' in group_names"
-  notify: restart_hdfs
+    - name: Configure HDFS for SSL
+      template:
+        src: hdfs-site.xml.j2
+        dest: $HADOOP_CONF_DIR/hdfs-site.xml
+      when: "'hadoop_cluster' in group_names"
+      notify: restart_hdfs
 
-- name: Deploy SSL client configuration for HDFS
-  template:
-    src: ssl-client.xml.j2
-    dest: $HADOOP_CONF_DIR/ssl-client.xml
-  when: "'hadoop_cluster' in group_names"
+    - name: Deploy SSL client configuration for HDFS
+      template:
+        src: ssl-client.xml.j2
+        dest: $HADOOP_CONF_DIR/ssl-client.xml
+      when: "'hadoop_cluster' in group_names"
 
-- name: Deploy SSL server configuration for HDFS
-  template:
-    src: ssl-server.xml.j2
-    dest: $HADOOP_CONF_DIR/ssl-server.xml
-  when: "'hadoop_cluster' in group_names"
+    - name: Deploy SSL server configuration for HDFS
+      template:
+        src: ssl-server.xml.j2
+        dest: $HADOOP_CONF_DIR/ssl-server.xml
+      when: "'hadoop_cluster' in group_names"
 
-- name: Configure Spark for SSL
-  template:
-    src: spark-defaults.conf.j2
-    dest: "{{ spark_home }}/conf/spark-defaults.conf"
-  when: "'spark_cluster' in group_names"
+    - name: Configure Spark for SSL
+      template:
+        src: spark-defaults.conf.j2
+        dest: "{{ spark_home }}/conf/spark-defaults.conf"
+      when: "'spark_cluster' in group_names"
+      notify: restart_spark
 
-- name: Configure Livy for SSL
-  template:
-    src: livy.conf.j2
-    dest: /etc/livy/conf/livy.conf
-  when: "'knox' in group_names"
-  notify: restart_livy
+    - name: Configure Livy for SSL
+      template:
+        src: livy.conf.j2
+        dest: /etc/livy/conf/livy.conf
+      when: "'knox' in group_names"
+      notify: restart_livy
 
-- name: Configure Knox for SSL
-  template:
-    src: gateway-site.xml.j2
-    dest: "{{knox_home}}/conf/gateway-site.xml"
-  when: "'knox' in group_names"
+    - name: Configure Knox for SSL
+      template:
+        src: gateway-site.xml.j2
+        dest: "{{ knox_home }}/conf/gateway-site.xml"
+      when: "'knox' in group_names"
+      notify: restart_knox
 
+  handlers:
+    - name: restart_hdfs
+      service:
+        name: hadoop-hdfs-namenode
+        state: restarted
+
+    - name: restart_spark
+      service:
+        name: spark-master
+        state: restarted
+
+    - name: restart_livy
+      service:
+        name: livy-server
+        state: restarted
+
+    - name: restart_knox
+      service:
+        name: knox-gateway
+        state: restarted
