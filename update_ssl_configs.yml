@@ -23,61 +23,61 @@
 
     - name: Configure HDFS for SSL
       template:
-        src: hdfs-site.xml.j2
+        src: templates/hadoop/hdfs-site.xml.j2
         dest: $HADOOP_CONF_DIR/hdfs-site.xml
       when: "'hadoop_cluster' in group_names"
       notify: restart_hdfs
 
     - name: Deploy SSL client configuration for HDFS
       template:
-        src: ssl-client.xml.j2
+        src: templates/hadoop/ssl-client.xml.j2
         dest: $HADOOP_CONF_DIR/ssl-client.xml
       when: "'hadoop_cluster' in group_names"
 
     - name: Deploy SSL server configuration for HDFS
       template:
-        src: ssl-server.xml.j2
+        src: templates/hadoop/ssl-server.xml.j2
         dest: $HADOOP_CONF_DIR/ssl-server.xml
       when: "'hadoop_cluster' in group_names"
 
     - name: Configure Spark for SSL
       template:
-        src: spark-defaults.conf.j2
+        src: templates/spark/spark-defaults.conf.j2
         dest: "{{ spark_home }}/conf/spark-defaults.conf"
       when: "'spark_cluster' in group_names"
       notify: restart_spark
 
     - name: Configure Livy for SSL
       template:
-        src: livy.conf.j2
+        src: templates/livy/livy.conf.j2
         dest: /etc/livy/conf/livy.conf
       when: "'knox' in group_names"
       notify: restart_livy
 
     - name: Configure Knox for SSL
       template:
-        src: gateway-site.xml.j2
+        src: templates/knox/gateway-site.xml.j2
         dest: "{{ knox_home }}/conf/gateway-site.xml"
       when: "'knox' in group_names"
       notify: restart_knox
 
-  handlers:
-    - name: restart_hdfs
-      service:
-        name: hadoop-hdfs-namenode
-        state: restarted
-
-    - name: restart_spark
-      service:
-        name: spark-master
-        state: restarted
-
-    - name: restart_livy
-      service:
-        name: livy-server
-        state: restarted
-
-    - name: restart_knox
-      service:
-        name: knox-gateway
-        state: restarted
+  # handlers:
+  #   - name: restart_hdfs
+  #     service:
+  #       name: hadoop-hdfs-namenode
+  #       state: restarted
+  #
+  #   - name: restart_spark
+  #     service:
+  #       name: spark-master
+  #       state: restarted
+  #
+  #   - name: restart_livy
+  #     service:
+  #       name: livy-server
+  #       state: restarted
+  #
+  #   - name: restart_knox
+  #     service:
+  #       name: knox-gateway
+  #       state: restarted
