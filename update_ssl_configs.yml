@@ -8,8 +8,15 @@
       spark_version: "spark-3.4.3"
       spark_home: "/usr/local/spark"
       hadoop_home: "/usr/local/hadoop"
-      java_home: "/usr/lib/jvm/java-1.11.0-openjdk-amd64"  # Ensure this matches the Java version used in Hadoop
+      java_home: "/usr/lib/jvm/java-1.11.0-openjdk-amd64"
       namenode_hostname: "Master1"
+      ssl_keystore_path: "/etc/ssl/hadoop/keystore.jks"
+      ssl_truststore_path: "/etc/ssl/hadoop/truststore.jks"
+      keystore_password: "{{ lookup('file', 'secure_files/ssl/password.txt') | default('') }}"
+      ssl_cert_path: "/etc/ssl/hadoop"
+      star_cert: "STAR.handong.edu.crt"
+      star_key: "STAR.handong.edu.key"
+      chain_cert: "chainca.crt"
       spark_history_provider: "org.apache.spark.deploy.history.FsHistoryProvider"
       spark_driver_memory: "6144m"
       spark_yarn_am_memory: "2048m"
@@ -38,41 +45,65 @@
       hadoop_security_authorization_bool: "true"
       yarn_token_renew_interval: "3600000"
       yarn_token_max_lifetime: "604800000"
+
   tasks:
-    - name: Ensure certs directory exists
+    - name: Ensure SSL cert directory exists
       file:
-        path: "{{ ssl_keystore_path }}"
+        path: "{{ ssl_cert_path }}"
         state: directory
-        owner: ubuntu
+        owner: root
         mode: '0700'
 
-    - name: Copy SSL certificate files to each host
+    - name: Copy SSL certificates to each host
       copy:
-        src: "{{ item }}"
-        dest: "{{ ssl_keystore_path }}/"
-        owner: ubuntu
+        src: "secure_files/ssl/{{ item }}"
+        dest: "{{ ssl_cert_path }}/{{ item }}"
+        owner: root
         mode: '0600'
       with_items:
-        - "secure_files/ssl/STAR.handong.edu.crt"
-        - "secure_files/ssl/STAR.handong.edu.key"
-        - "secure_files/ssl/chainca.crt"
+        - "{{ star_cert }}"
+        - "{{ star_key }}"
+        - "{{ chain_cert }}"
+
+    - name: Import root certificate into truststore
+      command: >
+        keytool -import -alias root -file {{ ssl_cert_path }}/{{ chain_cert }} -keystore {{ ssl_truststore_path }}
+        -storepass {{ keystore_password }} -noprompt
+      args:
+        creates: "{{ ssl_truststore_path }}"
+
+    - name: Import STAR certificate into keystore
+      command: >
+        openssl pkcs12 -export -in {{ ssl_cert_path }}/{{ star_cert }} -inkey {{ ssl_cert_path }}/{{ star_key }}
+        -out {{ ssl_cert_path }}/star_keystore.p12 -name star -passout pass:{{ keystore_password }}
+      args:
+        creates: "{{ ssl_cert_path }}/star_keystore.p12"
+
+    - name: Import PKCS12 keystore into JKS keystore
+      command: >
+        keytool -importkeystore -srckeystore {{ ssl_cert_path }}/star_keystore.p12 -srcstoretype PKCS12
+        -srcstorepass {{ keystore_password }} -destkeystore {{ ssl_keystore_path }} -deststoretype JKS
+        -deststorepass {{ keystore_password }}
+      when: keystore_password != ""
+      args:
+        creates: "{{ ssl_keystore_path }}"
 
     - name: Configure HDFS for SSL
       template:
         src: templates/hadoop/hdfs-site.xml.j2
-        dest: "/usr/local/hadoop/etc/hadoop/hdfs-site.xml"
+        dest: "{{ hadoop_home }}/etc/hadoop/hdfs-site.xml"
       when: "'hadoop_cluster' in group_names"
 
     - name: Deploy SSL client configuration for HDFS
       template:
         src: templates/hadoop/ssl-client.xml.j2
-        dest: "/usr/local/hadoop/etc/hadoop/ssl-client.xml"
+        dest: "{{ hadoop_home }}/etc/hadoop/ssl-client.xml"
       when: "'hadoop_cluster' in group_names"
 
     - name: Deploy SSL server configuration for HDFS
       template:
         src: templates/hadoop/ssl-server.xml.j2
-        dest: "/usr/local/hadoop/etc/hadoop/ssl-server.xml"
+        dest: "{{ hadoop_home }}/etc/hadoop/ssl-server.xml"
       when: "'hadoop_cluster' in group_names"
 
     - name: Configure Spark for SSL
@@ -93,6 +124,10 @@
         dest: "{{ knox_home }}/conf/gateway-site.xml"
       when: "'knox' in group_names"
 
+    - name: Clean up temporary PKCS12 keystore
+      file:
+        path: "{{ ssl_cert_path }}/star_keystore.p12"
+        state: absent
   # handlers:
   #   - name: restart_hdfs
   #     service:
