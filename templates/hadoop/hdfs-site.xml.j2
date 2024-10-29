@@ -48,6 +48,26 @@
     </property>
 
     <property>
+        <name>ssl.server.keystore.location</name>
+        <value>/usr/local/hadoop/etc/hadoop/keystore.jks</value>
+    </property>
+    <property>
+        <name>ssl.server.keystore.password</name>
+        <value>kubic@j17</value>
+    </property>
+    <property>
+        <name>ssl.server.keystore.keypassword</name>
+        <value>kubic@j17</value>
+    </property>
+    <property>
+        <name>ssl.server.truststore.location</name>
+        <value>/usr/local/hadoop/etc/hadoop/truststore.jks</value>
+    </property>
+    <property>
+        <name>ssl.server.truststore.password</name>
+        <value>kubic@j17</value>
+    </property>
+    <property>
         <name>dfs.secondary.namenode.keytab.file</name>
         <value>{{ hdfs_keytab_file_path }}</value>
     </property>
