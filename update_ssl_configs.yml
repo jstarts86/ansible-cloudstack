@@ -80,7 +80,6 @@
         src: templates/spark/spark-defaults.conf.j2
         dest: "{{ spark_home }}/conf/spark-defaults.conf"
       when: "'spark_cluster' in group_names"
-      notify: restart_spark
 
     - name: Configure Livy for SSL
       template:
