@@ -2,6 +2,9 @@
 - name: Update SSL configurations on Hadoop and Spark nodes
   hosts: all
   become: yes
+  vars:
+      name_node_dir: "/home/ubuntu/data/nameNode"
+      data_node_dir: "/home/ubuntu/data/dataNode"
   tasks:
     - name: Ensure certs directory exists
       file:
@@ -50,7 +53,7 @@
     - name: Configure Livy for SSL
       template:
         src: templates/livy/livy.conf.j2
-        dest: /etc/livy/conf/livy.conf
+        dest: /opt/livy/conf/livy.conf
       when: "'knox' in group_names"
       notify: restart_livy
 
