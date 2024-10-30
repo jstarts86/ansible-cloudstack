@@ -1,22 +1,19 @@
 <configuration>
   <property>
     <name>ssl.server.keystore.location</name>
-    <value>{{ ssl_keystore_path }}/STAR.handong.edu.crt</value>
-  </property>
-  <property>
-    <name>ssl.server.keystore.key</name>
-    <value>{{ ssl_keystore_path }}/STAR.handong.edu.key</value>
+    <value>{{ ssl_keystore_path }}</value>
   </property>
   <property>
     <name>ssl.server.keystore.password</name>
-    <value></value>
+    <value>{{ keystore_password }}</value>
   </property>
   <property>
     <name>ssl.server.truststore.location</name>
-    <value>{{ ssl_keystore_path }}/chainca.crt</value>
+    <value>{{ ssl_truststore_path }}</value>
   </property>
   <property>
     <name>ssl.server.truststore.password</name>
-    <value></value>
+    <value>{{ keystore_password }}</value>
   </property>
 </configuration>
+

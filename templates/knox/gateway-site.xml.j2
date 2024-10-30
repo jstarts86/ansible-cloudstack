@@ -195,10 +195,18 @@ limitations under the License.
     </property>
     <property>
         <name>gateway.ssl.keystore.path</name>
-        <value>{{ ssl_keystore_path }}/STAR.handong.edu.crt</value>
+        <value>{{ ssl_keystore_path }}</value>
+    </property>
+    <property>
+        <name>gateway.ssl.keystore.password</name>
+        <value>{{ keystore_password }}</value>
     </property>
     <property>
         <name>gateway.truststore.path</name>
-        <value>{{ ssl_keystore_path }}/chainca.crt</value>
+        <value>{{ ssl_truststore_path }}</value>
+    </property>
+    <property>
+        <name>gateway.truststore.password</name>
+        <value>{{ keystore_password }}</value>
     </property>
 </configuration>

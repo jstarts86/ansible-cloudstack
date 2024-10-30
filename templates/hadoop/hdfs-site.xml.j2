@@ -38,71 +38,65 @@
       <name>dfs.web.authentication.kerberos.keytab</name>
       <value>{{ http_keytab_file_path }}</value>
   </property>
-    <property>
-        <name>dfs.namenode.keytab.file</name>
-        <value>{{ hdfs_keytab_file_path }}</value>
-    </property>
-    <property>
-        <name>dfs.datanode.keytab.file</name>
-        <value>{{ hdfs_keytab_file_path }}</value>
-    </property>
-
-    <property>
-        <name>dfs.secondary.namenode.keytab.file</name>
-        <value>{{ hdfs_keytab_file_path }}</value>
-    </property>
   <property>
-    <name>dfs.namenode.http-address</name>
-    <value>Master1:9870</value>
+      <name>dfs.namenode.keytab.file</name>
+      <value>{{ hdfs_keytab_file_path }}</value>
   </property>
   <property>
-    <name>dfs.block.access.token.enable</name>
-    <value>true</value>
+      <name>dfs.datanode.keytab.file</name>
+      <value>{{ hdfs_keytab_file_path }}</value>
   </property>
   <property>
-    <name>dfs.http.policy</name>
-    <value>HTTPS_ONLY</value>
+      <name>dfs.secondary.namenode.keytab.file</name>
+      <value>{{ hdfs_keytab_file_path }}</value>
   </property>
   <property>
-    <name>dfs.http.policy</name>
-    <value>HTTPS_ONLY</value>
+      <name>dfs.namenode.http-address</name>
+      <value>Master1:9870</value>
   </property>
   <property>
-    <name>dfs.https.server.keystore.resource</name>
-    <value>{{ ssl_keystore_path }}/STAR.handong.edu.crt</value>
+      <name>dfs.block.access.token.enable</name>
+      <value>true</value>
   </property>
   <property>
-    <name>ssl.server.keystore.keypassword</name>
-    <value></value>
+      <name>dfs.http.policy</name>
+      <value>HTTPS_ONLY</value>
   </property>
   <property>
-    <name>ssl.server.keystore.key</name>
-    <value>{{ ssl_keystore_path }}/STAR.handong.edu.key</value>
+      <name>dfs.https.server.keystore.resource</name>
+      <value>{{ ssl_keystore_path }}</value>
   </property>
   <property>
-    <name>ssl.server.truststore.location</name>
-    <value>{{ ssl_keystore_path }}/chainca.crt</value>
+      <name>dfs.https.server.keystore.password</name>
+      <value>{{ keystore_password }}</value>
   </property>
   <property>
-    <name>dfs.datanode.data.dir.perm</name>
-    <value>700</value>
+      <name>dfs.https.server.truststore.resource</name>
+      <value>{{ ssl_truststore_path }}</value>
   </property>
   <property>
-    <name>dfs.data.transfer.protection</name>
-    <value>authentication</value> <!-- Or 'privacy' if encryption is required -->
+      <name>dfs.https.server.truststore.password</name>
+      <value>{{ keystore_password }}</value>
   </property>
   <property>
-    <name>dfs.datanode.address</name>
-    <value>0.0.0.0:9866</value>
+      <name>dfs.datanode.data.dir.perm</name>
+      <value>700</value>
   </property>
   <property>
-    <name>dfs.datanode.http.address</name>
-    <value>0.0.0.0:9864</value>
+      <name>dfs.data.transfer.protection</name>
+      <value>authentication</value>
   </property>
   <property>
-    <name>dfs.datanode.https.address</name>
-    <value>0.0.0.0:9865</value>
+      <name>dfs.datanode.address</name>
+      <value>0.0.0.0:9866</value>
+  </property>
+  <property>
+      <name>dfs.datanode.http.address</name>
+      <value>0.0.0.0:9864</value>
+  </property>
+  <property>
+      <name>dfs.datanode.https.address</name>
+      <value>0.0.0.0:9865</value>
   </property>
   {% endif %}
 </configuration>
-

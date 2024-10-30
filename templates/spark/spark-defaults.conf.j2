@@ -7,15 +7,16 @@ spark.executor.memory             {{ spark_executor_memory }}
 spark.eventLog.enabled            {{  spark_eventLog_enabled }}
 spark.eventLog.dir                {{ spark_eventLog_dir }}
 
-
 spark.dynamicAllocation.enabled            {{ spark_dynamicAllocation_enable }}
 spark.dynamicAllocation.minExecutors       {{ spark_dynamicAllocation_minExecutors }}
 spark.dynamicAllocation.maxExecutors       {{ spark_dynamicAllocation_maxExecutors }}
 spark.dynamicAllocation.initialExecutors   {{ spark_dynamicAllocation_initialExecutors }}
 spark.dynamicAllocation.executorIdleTimeout {{ spark_dynamicAllocation_executorIdleTimeout }}
 
-
+# SSL Configurations
 spark.ssl.enabled=true
-spark.ssl.keyStore={{ ssl_keystore_path }}/STAR.handong.edu.crt
-spark.ssl.trustStore={{ ssl_keystore_path }}/chainca.crt
+spark.ssl.keyStore={{ ssl_keystore_path }}
+spark.ssl.keyStorePassword={{ keystore_password }}
+spark.ssl.trustStore={{ ssl_truststore_path }}
+spark.ssl.trustStorePassword={{ keystore_password }}
 spark.ssl.ui.enabled=true
