@@ -47,99 +47,104 @@
       yarn_token_renew_interval: "3600000"
       yarn_token_max_lifetime: "604800000"
   tasks:
-    - name: Ensure SSL cert directory exists
-      file:
-        path: "{{ ssl_cert_path }}"
-        state: directory
-        owner: root
-        mode: '0700'
+      - name: Ensure SSL cert directory exists
+        file:
+          path: "{{ ssl_cert_path }}"
+          state: directory
+          owner: ubuntu
+          group: ubuntu
+          mode: '0755'
 
-    - name: Copy SSL certificates to each host
-      copy:
-        src: "secure_files/ssl/{{ item }}"
-        dest: "{{ ssl_cert_path }}/{{ item }}"
-        owner: root
-        mode: '0600'
-      with_items:
-        - "{{ star_cert }}"
-        - "{{ star_key }}"
-        - "{{ chain_cert }}"
+      - name: Copy SSL certificates to each host
+        copy:
+          src: "secure_files/ssl/{{ item }}"
+          dest: "{{ ssl_cert_path }}/{{ item }}"
+          owner: ubuntu
+          group: ubuntu
+          mode: '0644'
+        with_items:
+          - "{{ star_cert }}"
+          - "{{ star_key }}"
+          - "{{ chain_cert }}"
 
-    - name: Import root certificate into truststore (using Java 11 keytool)
-      command: >
-        {{ java11_home }}/bin/keytool -import -alias root -file {{ ssl_cert_path }}/{{ chain_cert }}
-        -keystore {{ ssl_truststore_path }} -storepass {{ keystore_password }} -noprompt
-      args:
-        creates: "{{ ssl_truststore_path }}"
-      when: "'KDCServer' in inventory_hostname"
+      - name: Set permissions on keystore and truststore files
+        file:
+          path: "{{ item }}"
+          owner: ubuntu
+          group: ubuntu
+          mode: '0644'
+        with_items:
+          - "{{ ssl_keystore_path }}"
+          - "{{ ssl_truststore_path }}"
+        when: keystore_password != ""
 
-    - name: Import STAR certificate into keystore (using Java 11 keytool)
-      command: >
-        openssl pkcs12 -export -in {{ ssl_cert_path }}/{{ star_cert }} -inkey {{ ssl_cert_path }}/{{ star_key }}
-        -out {{ ssl_cert_path }}/star_keystore.p12 -name star -passout pass:{{ keystore_password }}
-      args:
-        creates: "{{ ssl_cert_path }}/star_keystore.p12"
+      - name: Import root certificate into truststore
+        command: >
+          keytool -import -alias root -file {{ ssl_cert_path }}/{{ chain_cert }} -keystore {{ ssl_truststore_path }}
+          -storepass {{ keystore_password }} -noprompt
+        args:
+          creates: "{{ ssl_truststore_path }}"
+        environment:
+          PATH: /usr/lib/jvm/java-11-openjdk-amd64/bin:{{ ansible_env.PATH }}
 
-    - name: Import PKCS12 keystore into JKS keystore (using Java 11 keytool)
-      command: >
-        {{ java11_home }}/bin/keytool -importkeystore -srckeystore {{ ssl_cert_path }}/star_keystore.p12
-        -srcstoretype PKCS12 -srcstorepass {{ keystore_password }}
-        -destkeystore {{ ssl_keystore_path }} -deststoretype JKS -deststorepass {{ keystore_password }}
-      when: keystore_password != ""
-      args:
-        creates: "{{ ssl_keystore_path }}"
-    - name: Configure HDFS for SSL
-      template:
-        src: templates/hadoop/hdfs-site.xml.j2
-        dest: "{{ hadoop_home }}/etc/hadoop/hdfs-site.xml"
-      when: "'hadoop_cluster' in group_names"
+      - name: Import STAR certificate into keystore
+        command: >
+          openssl pkcs12 -export -in {{ ssl_cert_path }}/{{ star_cert }} -inkey {{ ssl_cert_path }}/{{ star_key }}
+          -out {{ ssl_cert_path }}/star_keystore.p12 -name star -passout pass:{{ keystore_password }}
+        args:
+          creates: "{{ ssl_cert_path }}/star_keystore.p12"
 
-    - name: Set ownership for keystore and truststore
-      file:
-        path: "{{ item }}"
-        owner: hadoop
-        group: hadoop
-        mode: '0640'
-      with_items:
-        - "{{ ssl_keystore_path }}"
-        - "{{ ssl_truststore_path }}"
-      when: inventory_hostname in groups['hadoop_cluster']
+      - name: Import PKCS12 keystore into JKS keystore
+        command: >
+          keytool -importkeystore -srckeystore {{ ssl_cert_path }}/star_keystore.p12 -srcstoretype PKCS12
+          -srcstorepass {{ keystore_password }} -destkeystore {{ ssl_keystore_path }} -deststoretype JKS
+          -deststorepass {{ keystore_password }}
+        when: keystore_password != ""
+        args:
+          creates: "{{ ssl_keystore_path }}"
+        environment:
+          PATH: /usr/lib/jvm/java-11-openjdk-amd64/bin:{{ ansible_env.PATH }}
 
-    - name: Deploy SSL client configuration for HDFS
-      template:
-        src: templates/hadoop/ssl-client.xml.j2
-        dest: "{{ hadoop_home }}/etc/hadoop/ssl-client.xml"
-      when: "'hadoop_cluster' in group_names"
+      - name: Configure HDFS for SSL
+        template:
+          src: templates/hadoop/hdfs-site.xml.j2
+          dest: "{{ hadoop_home }}/etc/hadoop/hdfs-site.xml"
+        when: "'hadoop_cluster' in group_names"
 
-    - name: Deploy SSL server configuration for HDFS
-      template:
-        src: templates/hadoop/ssl-server.xml.j2
-        dest: "{{ hadoop_home }}/etc/hadoop/ssl-server.xml"
-      when: "'hadoop_cluster' in group_names"
+      - name: Deploy SSL client configuration for HDFS
+        template:
+          src: templates/hadoop/ssl-client.xml.j2
+          dest: "{{ hadoop_home }}/etc/hadoop/ssl-client.xml"
+        when: "'hadoop_cluster' in group_names"
 
-    - name: Configure Spark for SSL
-      template:
-        src: templates/spark/spark-defaults.conf.j2
-        dest: "{{ spark_home }}/conf/spark-defaults.conf"
-      when: "'spark_cluster' in group_names"
+      - name: Deploy SSL server configuration for HDFS
+        template:
+          src: templates/hadoop/ssl-server.xml.j2
+          dest: "{{ hadoop_home }}/etc/hadoop/ssl-server.xml"
+        when: "'hadoop_cluster' in group_names"
 
-    - name: Configure Livy for SSL
-      template:
-        src: templates/livy/livy.conf.j2
-        dest: "/opt/livy/conf/livy.conf"
-      when: "'livy' in group_names"
+      - name: Configure Spark for SSL
+        template:
+          src: templates/spark/spark-defaults.conf.j2
+          dest: "{{ spark_home }}/conf/spark-defaults.conf"
+        when: "'spark_cluster' in group_names"
 
-    - name: Configure Knox for SSL
-      template:
-        src: templates/knox/gateway-site.xml.j2
-        dest: "{{ knox_home }}/conf/gateway-site.xml"
-      when: "'knox' in group_names"
+      - name: Configure Livy for SSL
+        template:
+          src: templates/livy/livy.conf.j2
+          dest: "/opt/livy/conf/livy.conf"
+        when: "'livy' in group_names"
 
-    - name: Clean up temporary PKCS12 keystore
-      file:
-        path: "{{ ssl_cert_path }}/star_keystore.p12"
-        state: absent
-  # handlers:
+      - name: Configure Knox for SSL
+        template:
+          src: templates/knox/gateway-site.xml.j2
+          dest: "{{ knox_home }}/conf/gateway-site.xml"
+        when: "'knox' in group_names"
+
+      - name: Clean up temporary PKCS12 keystore
+        file:
+          path: "{{ ssl_cert_path }}/star_keystore.p12"
+          state: absent
   #   - name: restart_hdfs
   #     service:
   #       name: hadoop-hdfs-namenode
