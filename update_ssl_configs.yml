@@ -9,7 +9,7 @@
       spark_home: "/usr/local/spark"
       hadoop_home: "/usr/local/hadoop"
       java_home: "/usr/lib/jvm/java-1.11.0-openjdk-amd64"
-      java11_home: "/usr/lib/jvm/java-11-openjdk"    # Java 11 path for keytool
+      java11_home: "/usr/lib/jvm/java-11-openjdk-amd64"    # Java 11 path for keytool
       namenode_hostname: "Master1"
       ssl_keystore_path: "/etc/ssl/hadoop/keystore.jks"
       ssl_truststore_path: "/etc/ssl/hadoop/truststore.jks"
