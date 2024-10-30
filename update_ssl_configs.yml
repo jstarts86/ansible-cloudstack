@@ -9,6 +9,7 @@
       spark_home: "/usr/local/spark"
       hadoop_home: "/usr/local/hadoop"
       java_home: "/usr/lib/jvm/java-1.11.0-openjdk-amd64"
+      java11_home: "/usr/lib/jvm/java-11-openjdk"    # Java 11 path for keytool
       namenode_hostname: "Master1"
       ssl_keystore_path: "/etc/ssl/hadoop/keystore.jks"
       ssl_truststore_path: "/etc/ssl/hadoop/truststore.jks"
@@ -65,30 +66,29 @@
         - "{{ star_key }}"
         - "{{ chain_cert }}"
 
-    - name: Import root certificate into truststore
+    - name: Import root certificate into truststore (using Java 11 keytool)
       command: >
-        keytool -import -alias root -file {{ ssl_cert_path }}/{{ chain_cert }}
-        -keystore {{ ssl_truststore_path }} -storepass {{ keystore_password }}
-        -noprompt
+        {{ java11_home }}/bin/keytool -import -alias root -file {{ ssl_cert_path }}/{{ chain_cert }}
+        -keystore {{ ssl_truststore_path }} -storepass {{ keystore_password }} -noprompt
       args:
         creates: "{{ ssl_truststore_path }}"
+      when: "'KDCServer' in inventory_hostname"
 
-    - name: Import STAR certificate into keystore
+    - name: Import STAR certificate into keystore (using Java 11 keytool)
       command: >
         openssl pkcs12 -export -in {{ ssl_cert_path }}/{{ star_cert }} -inkey {{ ssl_cert_path }}/{{ star_key }}
         -out {{ ssl_cert_path }}/star_keystore.p12 -name star -passout pass:{{ keystore_password }}
       args:
         creates: "{{ ssl_cert_path }}/star_keystore.p12"
 
-    - name: Import PKCS12 keystore into JKS keystore
+    - name: Import PKCS12 keystore into JKS keystore (using Java 11 keytool)
       command: >
-        keytool -importkeystore -srckeystore {{ ssl_cert_path }}/star_keystore.p12 -srcstoretype PKCS12
-        -srcstorepass {{ keystore_password }} -destkeystore {{ ssl_keystore_path }} -deststoretype JKS
-        -deststorepass {{ keystore_password }}
+        {{ java11_home }}/bin/keytool -importkeystore -srckeystore {{ ssl_cert_path }}/star_keystore.p12
+        -srcstoretype PKCS12 -srcstorepass {{ keystore_password }}
+        -destkeystore {{ ssl_keystore_path }} -deststoretype JKS -deststorepass {{ keystore_password }}
       when: keystore_password != ""
       args:
         creates: "{{ ssl_keystore_path }}"
-
     - name: Configure HDFS for SSL
       template:
         src: templates/hadoop/hdfs-site.xml.j2
