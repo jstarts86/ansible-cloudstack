@@ -67,8 +67,9 @@
 
     - name: Import root certificate into truststore
       command: >
-        keytool -import -alias root -file {{ ssl_cert_path }}/{{ chain_cert }} -keystore {{ ssl_truststore_path }}
-        -storepass {{ keystore_password }} -noprompt
+        keytool -import -alias root -file {{ ssl_cert_path }}/{{ chain_cert }}
+        -keystore {{ ssl_truststore_path }} -storepass {{ keystore_password }}
+        -noprompt
       args:
         creates: "{{ ssl_truststore_path }}"
 
