@@ -9,6 +9,7 @@
       spark_home: "/usr/local/spark"
       hadoop_home: "/usr/local/hadoop"
       java_home: "/usr/lib/jvm/java-1.11.0-openjdk-amd64"
+      java11_home: "/usr/lib/jvm/java-11-openjdk-amd64"    # Java 11 path for keytool
       namenode_hostname: "Master1"
       ssl_keystore_path: "/etc/ssl/hadoop/keystore.jks"
       ssl_truststore_path: "/etc/ssl/hadoop/truststore.jks"
@@ -17,70 +18,92 @@
       star_cert: "STAR.handong.edu.crt"
       star_key: "STAR.handong.edu.key"
       chain_cert: "chainca.crt"
+      spark_history_provider: "org.apache.spark.deploy.history.FsHistoryProvider"
+      spark_driver_memory: "6144m"
+      spark_yarn_am_memory: "2048m"
+      spark_executor_memory: "2560m"
+      spark_executor_cores: "2"
+      spark_dynamicAllocation_enable: "true"
+      spark_dynamicAllocation_minExecutors: "2"
+      spark_dynamicAllocation_maxExecutors: "4"
+      spark_dynamicAllocation_initialExecutors: "2"
+      spark_dynamicAllocation_executorIdleTimeout: "60s"
+      spark_eventLog_enabled: "true"
+      spark_history_fs_update_interval: "10s"
+      spark_history_ui_port: "18080"
+      spark_eventLog_dir: "hdfs://{{ namenode_hostname }}:9000/spark-logs"
+      hadoop_version: "hadoop-3.3.6"
+      yarn_app_mapreduce_resource_mb: "512"
+      yarn_app_map_resource_mb: "256"
+      yarn_app_reduce_resource_mb: "256"
+      replication_factor: "1"
+      yarn_acl_enable: "0"
+      yarn_nodemanager_resource_memory_mb: "2560"
+      yarn_scheduler_maximum_allocation_mb: "2048"
+      yarn_scheduler_minimum_allocation_mb: "512"
+      yarn_nodemanager_vmem_check_enabled: "false"
+      hadoop_security_authentication: "kerberos"
+      hadoop_security_authorization_bool: "true"
+      yarn_token_renew_interval: "3600000"
+      yarn_token_max_lifetime: "604800000"
   tasks:
     - name: Ensure SSL cert directory exists
       file:
         path: "{{ ssl_cert_path }}"
         state: directory
-        owner: ubuntu
-        group: ubuntu
-        mode: '0755'
+        owner: root
+        mode: '0700'
 
     - name: Copy SSL certificates to each host
       copy:
         src: "secure_files/ssl/{{ item }}"
         dest: "{{ ssl_cert_path }}/{{ item }}"
-        owner: ubuntu
-        group: ubuntu
-        mode: '0644'
+        owner: root
+        mode: '0600'
       with_items:
         - "{{ star_cert }}"
         - "{{ star_key }}"
         - "{{ chain_cert }}"
 
-    - name: Set permissions on keystore and truststore files
-      file:
-        path: "{{ item }}"
-        owner: ubuntu
-        group: ubuntu
-        mode: '0644'
-      with_items:
-        - "{{ ssl_keystore_path }}"
-        - "{{ ssl_truststore_path }}"
-      when: keystore_password != ""
-
-    - name: Import root certificate into truststore
+    - name: Import root certificate into truststore (using Java 11 keytool)
       command: >
-        keytool -import -alias root -file {{ ssl_cert_path }}/{{ chain_cert }} -keystore {{ ssl_truststore_path }}
-        -storepass {{ keystore_password }} -noprompt
+        {{ java11_home }}/bin/keytool -import -alias root -file {{ ssl_cert_path }}/{{ chain_cert }}
+        -keystore {{ ssl_truststore_path }} -storepass {{ keystore_password }} -noprompt
       args:
         creates: "{{ ssl_truststore_path }}"
-      environment:
-        PATH: /usr/lib/jvm/java-11-openjdk-amd64/bin:{{ ansible_env.PATH }}
+      when: "'KDCServer' in inventory_hostname"
 
-    - name: Import STAR certificate into keystore
+    - name: Import STAR certificate into keystore (using Java 11 keytool)
       command: >
         openssl pkcs12 -export -in {{ ssl_cert_path }}/{{ star_cert }} -inkey {{ ssl_cert_path }}/{{ star_key }}
         -out {{ ssl_cert_path }}/star_keystore.p12 -name star -passout pass:{{ keystore_password }}
       args:
         creates: "{{ ssl_cert_path }}/star_keystore.p12"
 
-    - name: Import PKCS12 keystore into JKS keystore
+    - name: Import PKCS12 keystore into JKS keystore (using Java 11 keytool)
       command: >
-        keytool -importkeystore -srckeystore {{ ssl_cert_path }}/star_keystore.p12 -srcstoretype PKCS12
-        -srcstorepass {{ keystore_password }} -destkeystore {{ ssl_keystore_path }} -deststoretype JKS
-        -deststorepass {{ keystore_password }}
+        {{ java11_home }}/bin/keytool -importkeystore -srckeystore {{ ssl_cert_path }}/star_keystore.p12
+        -srcstoretype PKCS12 -srcstorepass {{ keystore_password }}
+        -destkeystore {{ ssl_keystore_path }} -deststoretype JKS -deststorepass {{ keystore_password }}
       when: keystore_password != ""
       args:
         creates: "{{ ssl_keystore_path }}"
-      environment:
-        PATH: /usr/lib/jvm/java-11-openjdk-amd64/bin:{{ ansible_env.PATH }}
-
     - name: Configure HDFS for SSL
       template:
         src: templates/hadoop/hdfs-site.xml.j2
         dest: "{{ hadoop_home }}/etc/hadoop/hdfs-site.xml"
       when: "'hadoop_cluster' in group_names"
+
+    - name: Set ownership for keystore and truststore
+      file:
+        path: "{{ item }}"
+        owner: hadoop
+        group: hadoop
+        mode: '0640'
+      with_items:
+        - "{{ ssl_keystore_path }}"
+        - "{{ ssl_truststore_path }}"
+      when: inventory_hostname in groups['hadoop_cluster']
 
     - name: Deploy SSL client configuration for HDFS
       template:
@@ -116,3 +139,43 @@
       file:
         path: "{{ ssl_cert_path }}/star_keystore.p12"
         state: absent
+  # handlers:
+  #   - name: restart_hdfs
+  #     service:
+  #       name: hadoop-hdfs-namenode
+  #       state: restarted
+  #
+  #   - name: restart_spark
+  #     service:
+  #       name: spark-master
+  #       state: restarted
+  #
+  #   - name: restart_livy
+  #     service:
+  #       name: livy-server
+  #       state: restarted
+  #
+  #   - name: restart_knox
+  #     service:
+  #       name: knox-gateway
+  #       state: restarted
+  # handlers:
+  #   - name: restart_hdfs
+  #     service:
+  #       name: hadoop-hdfs-namenode
+  #       state: restarted
+  #
+  #   - name: restart_spark
+  #     service:
+  #       name: spark-master
+  #       state: restarted
+  #
+  #   - name: restart_livy
+  #     service:
+  #       name: livy-server
+  #       state: restarted
+  #
+  #   - name: restart_knox
+  #     service:
+  #       name: knox-gateway
+  #       state: restarted
