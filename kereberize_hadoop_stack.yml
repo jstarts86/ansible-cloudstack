@@ -1,0 +1,154 @@
+---
+- name: Kerberize Hadoop, Knox, Spark, and Livy
+  hosts: all
+  become: true
+  vars:
+    kerberos_realm: "CS2CLOUD.INTERNAL"
+    kdc_server: "192.168.1.40"  # IP of KDCServer
+    admin_principal: "admin/admin@CS2CLOUD.INTERNAL"
+    admin_password: "{{ lookup('file', 'secure_files/ssl/password.txt') | default('') }}"
+    hadoop_keytabs_path: "/home/ubuntu/keytabs"
+    hadoop_user_principal: "hdfs/Knox@CS2CLOUD.INTERNAL"
+    http_principal: "HTTP/Knox@CS2CLOUD.INTERNAL"
+    livy_principal: "livy/Knox@CS2CLOUD.INTERNAL"
+    knox_principal: "knox/Knox@CS2CLOUD.INTERNAL"
+    yarn_principal: "yarn/Knox@CS2CLOUD.INTERNAL"
+
+  tasks:
+    - name: Install Kerberos packages on all nodes
+      apt:
+        name:
+          - krb5-user
+          - krb5-admin-server
+          - krb5-kdc
+        state: present
+        update_cache: yes
+
+    - name: Configure krb5.conf
+      template:
+        src: "templates/krb5.conf.j2"
+        dest: "/etc/krb5.conf"
+      vars:
+        kdc_server: "{{ kdc_server }}"
+        kerberos_realm: "{{ kerberos_realm }}"
+
+    - name: Configure KDC on KDCServer
+      when: inventory_hostname == "KDCServer"
+      block:
+        - name: Initialize the Kerberos database
+          shell: kdb5_util create -s -r {{ kerberos_realm }}
+          args:
+            creates: "/var/lib/krb5kdc/principal"
+
+        - name: Configure kadm5.acl
+          copy:
+            content: "{{ admin_principal }} *"
+            dest: "/etc/krb5kdc/kadm5.acl"
+
+        - name: Restart Kerberos services
+          service:
+            name: "{{ item }}"
+            state: restarted
+          loop:
+            - krb5-admin-server
+            - krb5-kdc
+
+    - name: Create Kerberos principals for Hadoop services
+      block:
+        - name: Add Hadoop service principals
+          shell: |
+            echo "{{ admin_password }}" | kadmin -p {{ admin_principal }} -q "
+            addprinc -randkey {{ hadoop_user_principal }};
+            addprinc -randkey {{ http_principal }};
+            addprinc -randkey {{ yarn_principal }};
+            addprinc -randkey {{ livy_principal }};
+            addprinc -randkey {{ knox_principal }}"
+
+        - name: Create keytabs for Hadoop services
+          shell: |
+            echo "{{ admin_password }}" | kadmin -p {{ admin_principal }} -q "
+            xst -k {{ hadoop_keytabs_path }}/hdfs.keytab {{ hadoop_user_principal }};
+            xst -k {{ hadoop_keytabs_path }}/HTTP.keytab {{ http_principal }};
+            xst -k {{ hadoop_keytabs_path }}/yarn.keytab {{ yarn_principal }};
+            xst -k {{ hadoop_keytabs_path }}/livy.keytab {{ livy_principal }};
+            xst -k {{ hadoop_keytabs_path }}/knox.keytab {{ knox_principal }}"
+          args:
+            creates: "{{ hadoop_keytabs_path }}/hdfs.keytab"
+
+    - name: Configure Hadoop for Kerberos
+      block:
+        - name: Configure core-site.xml for Kerberos
+          template:
+            src: "templates/hadoop/core-site.xml.j2"
+            dest: "{{ hadoop_home }}/etc/hadoop/core-site.xml"
+
+        - name: Configure hdfs-site.xml for Kerberos
+          template:
+            src: "templates/hadoop/hdfs-site.xml.j2"
+            dest: "{{ hadoop_home }}/etc/hadoop/hdfs-site.xml"
+
+        - name: Deploy SSL client/server configuration
+          template:
+            src: "templates/hadoop/ssl-client.xml.j2"
+            dest: "{{ hadoop_home }}/etc/hadoop/ssl-client.xml"
+          with_items:
+            - ssl-client.xml
+            - ssl-server.xml
+          
+        - name: Configure Yarn for Kerberos
+          template:
+            src: "templates/hadoop/yarn-site.xml.j2"
+            dest: "{{ hadoop_home }}/etc/hadoop/yarn-site.xml"
+
+        - name: Configure MapReduce for Kerberos
+          template:
+            src: "templates/hadoop/mapred-site.xml.j2"
+            dest: "{{ hadoop_home }}/etc/hadoop/mapred-site.xml"
+
+    - name: Configure Spark for Kerberos
+      block:
+        - name: Configure spark-defaults.conf for Kerberos
+          template:
+            src: "templates/spark/spark-defaults.conf.j2"
+            dest: "{{ spark_home }}/conf/spark-defaults.conf"
+
+        - name: Enable Spark history server SSL
+          template:
+            src: "templates/spark/spark-history-server.xml.j2"
+            dest: "{{ spark_home }}/conf/spark-history-server.xml"
+
+    - name: Configure Livy for Kerberos
+      template:
+        src: "templates/livy/livy.conf.j2"
+        dest: "{{ livy_home }}/conf/livy.conf"
+
+    - name: Configure Knox for Kerberos
+      template:
+        src: "templates/knox/gateway-site.xml.j2"
+        dest: "{{ knox_home }}/conf/gateway-site.xml"
+
+    - name: Set permissions on keytab files
+      file:
+        path: "{{ hadoop_keytabs_path }}/{{ item }}"
+        owner: ubuntu
+        mode: '0600'
+      loop:
+        - hdfs.keytab
+        - HTTP.keytab
+        - yarn.keytab
+        - livy.keytab
+        - knox.keytab
+
+    # - name: Restart Hadoop, Spark, Knox, and Livy services
+    #   service:
+    #     name: "{{ item }}"
+    #     state: restarted
+    #   loop:
+    #     - hadoop-hdfs-namenode
+    #     - hadoop-hdfs-datanode
+    #     - hadoop-yarn-resourcemanager
+    #     - hadoop-yarn-nodemanager
+    #     - spark-history-server
+    #     - livy-server
+    #     - knox-gateway
+    #
