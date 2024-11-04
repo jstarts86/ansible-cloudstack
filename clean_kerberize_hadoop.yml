@@ -1,0 +1,74 @@
+---
+- name: Clean up Kerberos configurations
+  hosts: all
+  become: true
+  vars:
+    kerberos_realm: "CS2CLOUD.INTERNAL"
+    hadoop_keytabs_path: "/home/ubuntu/keytabs"
+  tasks:
+    - name: Remove Kerberos-related packages (KDC server only)
+      when: inventory_hostname == "KDCServer"
+      apt:
+        name:
+          - krb5-user
+          - krb5-admin-server
+          - krb5-kdc
+        state: absent
+
+    - name: Delete Kerberos configuration files
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - "/etc/krb5.conf"
+        - "/etc/krb5kdc/kdc.conf"
+        - "/etc/krb5kdc/kadm5.acl"
+        - "{{ hadoop_keytabs_path }}/hdfs.keytab"
+        - "{{ hadoop_keytabs_path }}/HTTP.keytab"
+        - "{{ hadoop_keytabs_path }}/yarn.keytab"
+        - "{{ hadoop_keytabs_path }}/livy.keytab"
+        - "{{ hadoop_keytabs_path }}/knox.keytab"
+
+    # - name: Reset core-site.xml Kerberos configurations
+    #   template:
+    #     src: "templates/hadoop/core-site-no-kerberos.xml.j2"
+    #     dest: "{{ hadoop_home }}/etc/hadoop/core-site.xml"
+    #
+    # - name: Reset hdfs-site.xml Kerberos configurations
+    #   template:
+    #     src: "templates/hadoop/hdfs-site-no-kerberos.xml.j2"
+    #     dest: "{{ hadoop_home }}/etc/hadoop/hdfs-site.xml"
+    #
+    # - name: Reset yarn-site.xml Kerberos configurations
+    #   template:
+    #     src: "templates/hadoop/yarn-site-no-kerberos.xml.j2"
+    #     dest: "{{ hadoop_home }}/etc/hadoop/yarn-site.xml"
+    #
+    # - name: Reset spark-defaults.conf Kerberos configurations
+    #   template:
+    #     src: "templates/spark/spark-defaults-no-kerberos.conf.j2"
+    #     dest: "{{ spark_home }}/conf/spark-defaults.conf"
+    #
+    # - name: Reset gateway-site.xml Kerberos configurations
+    #   template:
+    #     src: "templates/knox/gateway-site-no-kerberos.xml.j2"
+    #     dest: "{{ knox_home }}/conf/gateway-site.xml"
+    #
+    # - name: Reset Livy configuration Kerberos settings
+    #   template:
+    #     src: "templates/livy/livy-no-kerberos.conf.j2"
+    #     dest: "{{ livy_home }}/conf/livy.conf"
+    #
+    # - name: Restart Hadoop, Spark, Knox, and Livy services
+    #   service:
+    #     name: "{{ item }}"
+    #     state: restarted
+    #   loop:
+    #     - hadoop-hdfs-namenode
+    #     - hadoop-hdfs-datanode
+    #     - hadoop-yarn-resourcemanager
+    #     - hadoop-yarn-nodemanager
+    #     - spark-history-server
+    #     - livy-server
+    #     - knox-gateway
+    #
