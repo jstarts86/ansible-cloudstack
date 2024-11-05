@@ -129,7 +129,7 @@
     - name: Debug - Keytab Creation Status
       debug:
         msg: "Keytab file for hdfs was not created."
-      when: hdfs_keytab_status is defined and hdfs_keytab_status.stat.exists == false
+      when: "hdfs_keytab_status is defined and (not hdfs_keytab_status.stat.exists | default(false))"
 
     - name: Copy keytabs to other nodes
       copy:
@@ -137,6 +137,7 @@
         dest: "{{ hadoop_keytabs_path }}/{{ item }}"
         owner: ubuntu
         mode: '0600'
+        remote_src: true  # Indicates the file is on the remote node
       loop:
         - hdfs.keytab
         - HTTP.keytab
@@ -144,7 +145,7 @@
         - livy.keytab
         - knox.keytab
       delegate_to: KDCServer
-      when: hdfs_keytab_status is defined and hdfs_keytab_status.stat.exists == true
+      when: "hdfs_keytab_status is defined and hdfs_keytab_status.stat.exists | default(false)"
 
     - name: Set permissions on keytab files
       file:
@@ -157,7 +158,6 @@
         - yarn.keytab
         - livy.keytab
         - knox.keytab
-
     - name: Configure Hadoop for Kerberos
       block:
         - name: Configure core-site.xml for Kerberos
