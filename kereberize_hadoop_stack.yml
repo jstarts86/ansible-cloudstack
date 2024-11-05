@@ -56,6 +56,7 @@
     spark_history_fs_update_interval: "10s"
     spark_history_ui_port: "18080"
     spark_eventLog_dir: "hdfs://{{ namenode_hostname }}:9000/spark-logs"
+
   tasks:
     - name: Install Kerberos packages on all nodes
       apt:
@@ -131,13 +132,20 @@
         msg: "Keytab file for hdfs was not created."
       when: "hdfs_keytab_status is defined and (not hdfs_keytab_status.stat.exists | default(false))"
 
-    - name: Copy keytabs to other nodes
+    - name: Ensure hadoop_keytabs_path directory exists on all nodes
+      file:
+        path: "{{ hadoop_keytabs_path }}"
+        state: directory
+        owner: ubuntu
+        mode: '0755'
+
+    - name: Copy keytabs from KDCServer to all nodes
       copy:
         src: "{{ hadoop_keytabs_path }}/{{ item }}"
         dest: "{{ hadoop_keytabs_path }}/{{ item }}"
         owner: ubuntu
         mode: '0600'
-        remote_src: true  # Indicates the file is on the remote node
+        remote_src: true
       loop:
         - hdfs.keytab
         - HTTP.keytab
@@ -147,17 +155,13 @@
       delegate_to: KDCServer
       when: "hdfs_keytab_status is defined and hdfs_keytab_status.stat.exists | default(false)"
 
-    - name: Set permissions on keytab files
+    - name: Ensure hadoop configuration directory exists on all nodes
       file:
-        path: "{{ hadoop_keytabs_path }}/{{ item }}"
+        path: "{{ hadoop_home }}/etc/hadoop"
+        state: directory
         owner: ubuntu
-        mode: '0600'
-      loop:
-        - hdfs.keytab
-        - HTTP.keytab
-        - yarn.keytab
-        - livy.keytab
-        - knox.keytab
+        mode: '0755'
+
     - name: Configure Hadoop for Kerberos
       block:
         - name: Configure core-site.xml for Kerberos
@@ -203,13 +207,12 @@
     - name: Configure Livy for Kerberos
       template:
         src: "templates/livy/livy.conf.j2"
-        dest: "{{ livy_home }}/conf/livy.conf"
+        dest: "{{ spark_home }}/conf/livy.conf"
 
     - name: Configure Knox for Kerberos
       template:
         src: "templates/knox/gateway-site.xml.j2"
-        dest: "{{ knox_home }}/conf/gateway-site.xml"
-
+        dest: "{{ spark_home }}/conf/gateway-site.xml"
     # - name: Restart Hadoop, Spark, Knox, and Livy services
     #   service:
     #     name: "{{ item }}"
