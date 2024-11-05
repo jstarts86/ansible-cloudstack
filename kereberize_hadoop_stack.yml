@@ -19,10 +19,16 @@
       apt:
         name:
           - krb5-user
-          - krb5-admin-server
           - krb5-kdc
         state: present
         update_cache: yes
+
+    - name: Install krb5-admin-server on KDCServer
+      apt:
+        name: krb5-admin-server
+        state: present
+        update_cache: yes
+      when: inventory_hostname == "KDCServer"
 
     - name: Configure krb5.conf
       template:
