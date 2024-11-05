@@ -80,8 +80,8 @@
     - name: Ensure ownership and permissions on Kerberos database
       file:
         path: "/var/lib/krb5kdc"
-        owner: ubuntu
-        group: ubuntu
+        owner: root
+        group: root
         mode: "0700"
       when: inventory_hostname == "KDCServer"
 
@@ -106,25 +106,46 @@
             - krb5-admin-server
             - krb5-kdc
 
-    - name: Add Hadoop service principals using kadmin.local
+    - name: Add Hadoop service principals and create keytabs using kadmin.local
       shell: |
         kadmin.local -q "
         addprinc -randkey {{ hadoop_user_principal }};
         addprinc -randkey {{ http_principal }};
         addprinc -randkey {{ yarn_principal }};
         addprinc -randkey {{ livy_principal }};
-        addprinc -randkey {{ knox_principal }}"
-      when: inventory_hostname == "KDCServer"
-
-    - name: Create keytabs for Hadoop services using kadmin.local
-      shell: |
-        kadmin.local -q "
+        addprinc -randkey {{ knox_principal }};
         xst -k {{ hadoop_keytabs_path }}/hdfs.keytab {{ hadoop_user_principal }};
         xst -k {{ hadoop_keytabs_path }}/HTTP.keytab {{ http_principal }};
         xst -k {{ hadoop_keytabs_path }}/yarn.keytab {{ yarn_principal }};
         xst -k {{ hadoop_keytabs_path }}/livy.keytab {{ livy_principal }};
         xst -k {{ hadoop_keytabs_path }}/knox.keytab {{ knox_principal }}"
       when: inventory_hostname == "KDCServer"
+
+    - name: Verify keytab creation
+      stat:
+        path: "{{ hadoop_keytabs_path }}/hdfs.keytab"
+      register: hdfs_keytab_status
+      when: inventory_hostname == "KDCServer"
+
+    - name: Debug - Keytab Creation Status
+      debug:
+        msg: "Keytab file for hdfs was not created."
+      when: hdfs_keytab_status.stat.exists == false
+
+    - name: Copy keytabs to other nodes
+      copy:
+        src: "{{ hadoop_keytabs_path }}/{{ item }}"
+        dest: "{{ hadoop_keytabs_path }}/{{ item }}"
+        owner: ubuntu
+        mode: '0600'
+      loop:
+        - hdfs.keytab
+        - HTTP.keytab
+        - yarn.keytab
+        - livy.keytab
+        - knox.keytab
+      delegate_to: KDCServer
+      when: hdfs_keytab_status.stat.exists == true
 
     - name: Set permissions on keytab files
       file:
@@ -157,7 +178,7 @@
           with_items:
             - ssl-client.xml
             - ssl-server.xml
-          
+
         - name: Configure Yarn for Kerberos
           template:
             src: "templates/hadoop/yarn-site.xml.j2"
@@ -189,18 +210,6 @@
       template:
         src: "templates/knox/gateway-site.xml.j2"
         dest: "{{ knox_home }}/conf/gateway-site.xml"
-
-    - name: Set permissions on keytab files
-      file:
-        path: "{{ hadoop_keytabs_path }}/{{ item }}"
-        owner: ubuntu
-        mode: '0600'
-      loop:
-        - hdfs.keytab
-        - HTTP.keytab
-        - yarn.keytab
-        - livy.keytab
-        - knox.keytab
 
     # - name: Restart Hadoop, Spark, Knox, and Livy services
     #   service:
