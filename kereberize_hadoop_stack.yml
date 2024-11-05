@@ -108,17 +108,16 @@
 
     - name: Add Hadoop service principals and create keytabs using kadmin.local
       shell: |
-        kadmin.local -q "
-        addprinc -randkey {{ hadoop_user_principal }};
-        addprinc -randkey {{ http_principal }};
-        addprinc -randkey {{ yarn_principal }};
-        addprinc -randkey {{ livy_principal }};
-        addprinc -randkey {{ knox_principal }};
-        xst -k {{ hadoop_keytabs_path }}/hdfs.keytab {{ hadoop_user_principal }};
-        xst -k {{ hadoop_keytabs_path }}/HTTP.keytab {{ http_principal }};
-        xst -k {{ hadoop_keytabs_path }}/yarn.keytab {{ yarn_principal }};
-        xst -k {{ hadoop_keytabs_path }}/livy.keytab {{ livy_principal }};
-        xst -k {{ hadoop_keytabs_path }}/knox.keytab {{ knox_principal }}"
+        kadmin.local -q "addprinc -randkey {{ hadoop_user_principal }}"
+        kadmin.local -q "addprinc -randkey {{ http_principal }}"
+        kadmin.local -q "addprinc -randkey {{ yarn_principal }}"
+        kadmin.local -q "addprinc -randkey {{ livy_principal }}"
+        kadmin.local -q "addprinc -randkey {{ knox_principal }}"
+        kadmin.local -q "xst -k {{ hadoop_keytabs_path }}/hdfs.keytab {{ hadoop_user_principal }}"
+        kadmin.local -q "xst -k {{ hadoop_keytabs_path }}/HTTP.keytab {{ http_principal }}"
+        kadmin.local -q "xst -k {{ hadoop_keytabs_path }}/yarn.keytab {{ yarn_principal }}"
+        kadmin.local -q "xst -k {{ hadoop_keytabs_path }}/livy.keytab {{ livy_principal }}"
+        kadmin.local -q "xst -k {{ hadoop_keytabs_path }}/knox.keytab {{ knox_principal }}"
       when: inventory_hostname == "KDCServer"
 
     - name: Verify keytab creation
@@ -130,7 +129,7 @@
     - name: Debug - Keytab Creation Status
       debug:
         msg: "Keytab file for hdfs was not created."
-      when: hdfs_keytab_status.stat.exists == false
+      when: hdfs_keytab_status is defined and hdfs_keytab_status.stat.exists == false
 
     - name: Copy keytabs to other nodes
       copy:
@@ -145,7 +144,7 @@
         - livy.keytab
         - knox.keytab
       delegate_to: KDCServer
-      when: hdfs_keytab_status.stat.exists == true
+      when: hdfs_keytab_status is defined and hdfs_keytab_status.stat.exists == true
 
     - name: Set permissions on keytab files
       file:
