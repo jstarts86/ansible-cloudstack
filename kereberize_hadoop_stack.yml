@@ -1,4 +1,5 @@
 ---
+
 - name: Kerberize Hadoop, Knox, Spark, and Livy
   hosts: all
   become: true
@@ -139,25 +140,6 @@
         owner: ubuntu
         mode: '0755'
 
-- name: Copy keytabs to Master1 from KDCServer
-  hosts: Master1
-  become: true
-  tasks:
-    - name: Copy each keytab file from KDCServer
-      copy:
-        src: "{{ hadoop_keytabs_path }}/{{ item }}"
-        dest: "{{ hadoop_keytabs_path }}/{{ item }}"
-        owner: ubuntu
-        mode: '0600'
-        remote_src: yes
-      loop:
-        - hdfs.keytab
-        - HTTP.keytab
-        - yarn.keytab
-        - livy.keytab
-        - knox.keytab
-      delegate_to: KDCServer
-
     - name: Copy keytabs to other nodes from KDCServer
       copy:
         src: "{{ hadoop_keytabs_path }}/{{ item }}"
@@ -237,6 +219,30 @@
       template:
         src: "templates/knox/gateway-site.xml.j2"
         dest: "{{ spark_home }}/conf/gateway-site.xml"
+
+- name: Copy keytabs to Master1 from KDCServer
+  hosts: Master1
+  vars:
+  become: true
+  tasks:
+    - name: Copy each keytab file from KDCServer
+      copy:
+        src: "{{ hadoop_keytabs_path }}/{{ item }}"
+        dest: "{{ hadoop_keytabs_path }}/{{ item }}"
+        owner: ubuntu
+        mode: '0600'
+        remote_src: yes
+      loop:
+        - hdfs.keytab
+        - HTTP.keytab
+        - yarn.keytab
+        - livy.keytab
+        - knox.keytab
+      delegate_to: KDCServer
+
+
+
+
     # - name: Restart Hadoop, Spark, Knox, and Livy services
     #   service:
     #     name: "{{ item }}"
