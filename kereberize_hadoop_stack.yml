@@ -56,27 +56,25 @@
             - krb5-admin-server
             - krb5-kdc
 
-    - name: Create Kerberos principals for Hadoop services
-      block:
-        - name: Add Hadoop service principals
-          shell: |
-            echo "{{ admin_password }}" | kadmin -p {{ admin_principal }} -q "
-            addprinc -randkey {{ hadoop_user_principal }};
-            addprinc -randkey {{ http_principal }};
-            addprinc -randkey {{ yarn_principal }};
-            addprinc -randkey {{ livy_principal }};
-            addprinc -randkey {{ knox_principal }}"
+    - name: Add Hadoop service principals
+      shell: |
+        echo "{{ admin_password }}" | kadmin -p {{ admin_principal }} -q "
+        addprinc -randkey {{ hadoop_user_principal }};
+        addprinc -randkey {{ http_principal }};
+        addprinc -randkey {{ yarn_principal }};
+        addprinc -randkey {{ livy_principal }};
+        addprinc -randkey {{ knox_principal }}"
+      when: inventory_hostname == "KDCServer"
 
-        - name: Create keytabs for Hadoop services
-          shell: |
-            echo "{{ admin_password }}" | kadmin -p {{ admin_principal }} -q "
-            xst -k {{ hadoop_keytabs_path }}/hdfs.keytab {{ hadoop_user_principal }};
-            xst -k {{ hadoop_keytabs_path }}/HTTP.keytab {{ http_principal }};
-            xst -k {{ hadoop_keytabs_path }}/yarn.keytab {{ yarn_principal }};
-            xst -k {{ hadoop_keytabs_path }}/livy.keytab {{ livy_principal }};
-            xst -k {{ hadoop_keytabs_path }}/knox.keytab {{ knox_principal }}"
-          args:
-            creates: "{{ hadoop_keytabs_path }}/hdfs.keytab"
+    - name: Create keytabs for Hadoop services
+      shell: |
+        echo "{{ admin_password }}" | kadmin -p {{ admin_principal }} -q "
+        xst -k {{ hadoop_keytabs_path }}/hdfs.keytab {{ hadoop_user_principal }};
+        xst -k {{ hadoop_keytabs_path }}/HTTP.keytab {{ http_principal }};
+        xst -k {{ hadoop_keytabs_path }}/yarn.keytab {{ yarn_principal }};
+        xst -k {{ hadoop_keytabs_path }}/livy.keytab {{ livy_principal }};
+        xst -k {{ hadoop_keytabs_path }}/knox.keytab {{ knox_principal }}"
+      when: inventory_hostname == "KDCServer"
 
     - name: Configure Hadoop for Kerberos
       block:
