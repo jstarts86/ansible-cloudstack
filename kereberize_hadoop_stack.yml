@@ -56,6 +56,7 @@
     spark_history_fs_update_interval: "10s"
     spark_history_ui_port: "18080"
     spark_eventLog_dir: "hdfs://{{ namenode_hostname }}:9000/spark-logs"
+
   tasks:
     - name: Install Kerberos packages on all nodes
       apt:
@@ -76,6 +77,14 @@
       template:
         src: "templates/kerb/krb5.conf.j2"
         dest: "/etc/krb5.conf"
+
+    - name: Ensure ownership and permissions on Kerberos database
+      file:
+        path: "/var/lib/krb5kdc"
+        owner: ubuntu
+        group: ubuntu
+        mode: "0700"
+      when: inventory_hostname == "KDCServer"
 
     - name: Configure KDC on KDCServer
       when: inventory_hostname == "KDCServer"
@@ -98,9 +107,9 @@
             - krb5-admin-server
             - krb5-kdc
 
-    - name: Add Hadoop service principals
+    - name: Add Hadoop service principals using kadmin.local
       shell: |
-        echo "{{ admin_password }}" | kadmin -p {{ admin_principal }} -q "
+        kadmin.local -q "
         addprinc -randkey {{ hadoop_user_principal }};
         addprinc -randkey {{ http_principal }};
         addprinc -randkey {{ yarn_principal }};
@@ -108,9 +117,9 @@
         addprinc -randkey {{ knox_principal }}"
       when: inventory_hostname == "KDCServer"
 
-    - name: Create keytabs for Hadoop services
+    - name: Create keytabs for Hadoop services using kadmin.local
       shell: |
-        echo "{{ admin_password }}" | kadmin -p {{ admin_principal }} -q "
+        kadmin.local -q "
         xst -k {{ hadoop_keytabs_path }}/hdfs.keytab {{ hadoop_user_principal }};
         xst -k {{ hadoop_keytabs_path }}/HTTP.keytab {{ http_principal }};
         xst -k {{ hadoop_keytabs_path }}/yarn.keytab {{ yarn_principal }};
@@ -118,6 +127,17 @@
         xst -k {{ hadoop_keytabs_path }}/knox.keytab {{ knox_principal }}"
       when: inventory_hostname == "KDCServer"
 
+    - name: Set permissions on keytab files
+      file:
+        path: "{{ hadoop_keytabs_path }}/{{ item }}"
+        owner: ubuntu
+        mode: '0600'
+      loop:
+        - hdfs.keytab
+        - HTTP.keytab
+        - yarn.keytab
+        - livy.keytab
+        - knox.keytab
     - name: Configure Hadoop for Kerberos
       block:
         - name: Configure core-site.xml for Kerberos
