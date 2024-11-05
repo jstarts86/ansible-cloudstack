@@ -139,13 +139,13 @@
         owner: ubuntu
         mode: '0755'
 
-    - name: Copy keytabs from KDCServer to all nodes
+    - name: Copy keytabs to other nodes
       copy:
         src: "{{ hadoop_keytabs_path }}/{{ item }}"
         dest: "{{ hadoop_keytabs_path }}/{{ item }}"
         owner: ubuntu
         mode: '0600'
-        remote_src: true
+        remote_src: yes  # Indicate that the file exists on the remote server (KDCServer)
       loop:
         - hdfs.keytab
         - HTTP.keytab
@@ -153,8 +153,13 @@
         - livy.keytab
         - knox.keytab
       delegate_to: KDCServer
-      when: "hdfs_keytab_status is defined and hdfs_keytab_status.stat.exists | default(false)"
-
+      when: hdfs_keytab_status is defined and hdfs_keytab_status.stat.exists == true
+    - name: Ensure keytab directory exists on all nodes
+      file:
+        path: "{{ hadoop_keytabs_path }}"
+        state: directory
+        owner: ubuntu
+        mode: '0755'
     - name: Ensure hadoop configuration directory exists on all nodes
       file:
         path: "{{ hadoop_home }}/etc/hadoop"
