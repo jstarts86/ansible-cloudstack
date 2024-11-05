@@ -139,6 +139,23 @@
         owner: ubuntu
         mode: '0755'
 
+    - name: Copy keytabs to Master1 from KDCServer
+      hosts: Master1
+      tasks:
+        - name: Copy each keytab file from KDCServer
+          copy:
+            src: "{{ hadoop_keytabs_path }}/{{ item }}"
+            dest: "{{ hadoop_keytabs_path }}/{{ item }}"
+            owner: ubuntu
+            mode: '0600'
+            remote_src: yes
+          loop:
+            - hdfs.keytab
+            - HTTP.keytab
+            - yarn.keytab
+            - livy.keytab
+            - knox.keytab
+          delegate_to: KDCServer
     - name: Copy keytabs to other nodes from KDCServer
       copy:
         src: "{{ hadoop_keytabs_path }}/{{ item }}"
