@@ -26,7 +26,7 @@
 
     - name: Configure krb5.conf
       template:
-        src: "templates/krb5.conf.j2"
+        src: "templates/kerb/krb5.conf.j2"
         dest: "/etc/krb5.conf"
       vars:
         kdc_server: "{{ kdc_server }}"
