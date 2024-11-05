@@ -56,7 +56,6 @@
     spark_history_fs_update_interval: "10s"
     spark_history_ui_port: "18080"
     spark_eventLog_dir: "hdfs://{{ namenode_hostname }}:9000/spark-logs"
-
   tasks:
     - name: Install Kerberos packages on all nodes
       apt:
@@ -138,6 +137,7 @@
         - yarn.keytab
         - livy.keytab
         - knox.keytab
+
     - name: Configure Hadoop for Kerberos
       block:
         - name: Configure core-site.xml for Kerberos
