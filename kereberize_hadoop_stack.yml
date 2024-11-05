@@ -13,7 +13,25 @@
     livy_principal: "livy/Knox@CS2CLOUD.INTERNAL"
     knox_principal: "knox/Knox@CS2CLOUD.INTERNAL"
     yarn_principal: "yarn/Knox@CS2CLOUD.INTERNAL"
-
+    hadoop_version: "hadoop-3.3.6"
+    hadoop_home: "/usr/local/hadoop"
+    java_home: "/usr/lib/jvm/java-1.11.0-openjdk-amd64"
+    name_node_dir: "/home/ubuntu/data/nameNode"
+    data_node_dir: "/home/ubuntu/data/dataNode"
+    yarn_app_mapreduce_resource_mb: "512"
+    yarn_app_map_resource_mb: "256"
+    yarn_app_reduce_resource_mb: "256"
+    replication_factor: "1"
+    yarn_acl_enable: "0"
+    yarn_nodemanager_resource_memory_mb: "2560"
+    yarn_scheduler_maximum_allocation_mb: "2048"
+    yarn_scheduler_minimum_allocation_mb: "512"
+    yarn_nodemanager_vmem_check_enabled: "false"
+    hadoop_security_authentication: "kerberos"
+    hadoop_security_authorization_bool: "true"
+    yarn_token_renew_interval: "3600000"
+    yarn_token_max_lifetime: "604800000"
+    namenode_hostname: "Master1"
   tasks:
     - name: Install Kerberos packages on all nodes
       apt:
