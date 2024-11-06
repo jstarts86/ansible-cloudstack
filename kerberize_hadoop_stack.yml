@@ -81,6 +81,12 @@
     spark_history_fs_update_interval: "10s"
     spark_history_ui_port: "18080"
     spark_eventLog_dir: "hdfs://{{ namenode_hostname }}:9000/spark-logs"
+    services:
+      - { service: "hdfs", principal: "hdfs/{{ inventory_hostname }}@{{ kerberos_realm }}", keytab: "hdfs.keytab" }
+      - { service: "yarn", principal: "yarn/{{ inventory_hostname }}@{{ kerberos_realm }}", keytab: "yarn.keytab" }
+      - { service: "livy", principal: "livy/{{ inventory_hostname }}@{{ kerberos_realm }}", keytab: "livy.keytab" }
+      - { service: "HTTP", principal: "HTTP/{{ inventory_hostname }}@{{ kerberos_realm }}", keytab: "HTTP.keytab" }
+      - { service: "knox", principal: "knox/{{ inventory_hostname }}@{{ kerberos_realm }}", keytab: "knox.keytab" }
 
   tasks:
     - name: Install Kerberos packages on all nodes
@@ -126,16 +132,21 @@
 
     - name: Add Hadoop service principals and create keytabs using kadmin.local
       shell: |
-        kadmin.local -q "addprinc -randkey {{ hadoop_user_principal }}"
+        http_principal: "HTTP/Knox@CS2CLOUD.INTERNAL"
+        kadmin.local -q "addprinc -randkey hdfs/{{ inventory_hostname }}@CS2CLOUD.INTERNAL"
+        kadmin.local -q "addprinc -randkey http/{{ inventory_hostname }}@CS2CLOUD.INTERNAL"
+        kadmin.local -q "addprinc -randkey yarn/{{ inventory_hostname }}@CS2CLOUD.INTERNAL"
+        kadmin.local -q "addprinc -randkey livy/{{ inventory_hostname }}@CS2CLOUD.INTERNAL"
+        kadmin.local -q "addprinc -randkey knox/{{ inventory_hostname }}@CS2CLOUD.INTERNAL"
         kadmin.local -q "addprinc -randkey {{ http_principal }}"
         kadmin.local -q "addprinc -randkey {{ yarn_principal }}"
         kadmin.local -q "addprinc -randkey {{ livy_principal }}"
         kadmin.local -q "addprinc -randkey {{ knox_principal }}"
-        kadmin.local -q "xst -k {{ hadoop_keytabs_path }}/hdfs.keytab {{ hadoop_user_principal }}"
-        kadmin.local -q "xst -k {{ hadoop_keytabs_path }}/HTTP.keytab {{ http_principal }}"
-        kadmin.local -q "xst -k {{ hadoop_keytabs_path }}/yarn.keytab {{ yarn_principal }}"
-        kadmin.local -q "xst -k {{ hadoop_keytabs_path }}/livy.keytab {{ livy_principal }}"
-        kadmin.local -q "xst -k {{ hadoop_keytabs_path }}/knox.keytab {{ knox_principal }}"
+        kadmin.local -q "xst -k {{ hadoop_keytabs_path }}/hdfs.keytab hdfs/{{ inventory_hostname }}@CS2CLOUD.INTERNAL"
+        kadmin.local -q "xst -k {{ hadoop_keytabs_path }}/HTTP.keytab http/{{ inventory_hostname }}@CS2CLOUD.INTERNAL"
+        kadmin.local -q "xst -k {{ hadoop_keytabs_path }}/yarn.keytab yarn/{{ inventory_hostname }}@CS2CLOUD.INTERNAL"
+        kadmin.local -q "xst -k {{ hadoop_keytabs_path }}/livy.keytab livy/{{ inventory_hostname }}@CS2CLOUD.INTERNAL"
+        kadmin.local -q "xst -k {{ hadoop_keytabs_path }}/knox.keytab knox/{{ inventory_hostname }}@CS2CLOUD.INTERNAL"
       when: inventory_hostname == "KDCServer"
 
     - name: Ensure keytab directory exists on all nodes
