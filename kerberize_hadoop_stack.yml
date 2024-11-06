@@ -145,13 +145,19 @@
         owner: ubuntu
         mode: '0755'
 
-    - name: Synchronize keytab files from KDCServer to all nodes
-      synchronize:
-        src: "{{ hadoop_keytabs_path }}/"
-        dest: "{{ hadoop_keytabs_path }}/"
-        mode: pull
-        owner: yes
-        group: yes
+    - name: Copy keytab files from KDCServer to all nodes
+      copy:
+        src: "{{ hadoop_keytabs_path }}/{{ item }}"
+        dest: "{{ hadoop_keytabs_path }}/{{ item }}"
+        owner: ubuntu
+        mode: '0600'
+        remote_src: yes
+      loop:
+        - hdfs.keytab
+        - HTTP.keytab
+        - yarn.keytab
+        - livy.keytab
+        - knox.keytab
       delegate_to: KDCServer
       when: inventory_hostname != "KDCServer"
 
