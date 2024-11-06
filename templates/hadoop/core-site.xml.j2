@@ -4,5 +4,8 @@
         <name>fs.defaultFS</name>
         <value>hdfs://{{ namenode_hostname }}:9000</value>
     </property>
-
+    <property>
+        <name>hadoop.security.authentication</name>
+        <value>simple</value>
+    </property>
 </configuration>
