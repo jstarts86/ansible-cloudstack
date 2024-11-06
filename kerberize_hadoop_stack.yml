@@ -1,4 +1,29 @@
 ---
+# Play 1: Check keytab existence on KDCServer
+- name: Check keytab existence on KDCServer
+  hosts: KDCServer
+  become: true
+  tasks:
+    - name: Check if keytab files exist
+      stat:
+        path: "{{ hadoop_keytabs_path }}/{{ item }}"
+      register: keytab_status
+      loop:
+        - hdfs.keytab
+        - HTTP.keytab
+        - yarn.keytab
+        - livy.keytab
+        - knox.keytab
+
+    - name: Debug keytab status
+      debug:
+        msg: "{{ item }} exists: {{ item_stat.stat.exists }}"
+      loop: "{{ keytab_status.results }}"
+      loop_control:
+        loop_var: item_stat
+
+# Play 2: Main play to Kerberize Hadoop, Knox, Spark, and Livy
+---
 - name: Kerberize Hadoop, Knox, Spark, and Livy
   hosts: all
   become: true
@@ -113,28 +138,6 @@
         kadmin.local -q "xst -k {{ hadoop_keytabs_path }}/knox.keytab {{ knox_principal }}"
       when: inventory_hostname == "KDCServer"
 
-    - name: Check keytab existence on KDCServer
-      hosts: KDCServer
-      become: true
-      tasks:
-        - name: Check if keytab files exist
-          stat:
-            path: "{{ hadoop_keytabs_path }}/{{ item }}"
-          register: keytab_status
-          loop:
-            - hdfs.keytab
-            - HTTP.keytab
-            - yarn.keytab
-            - livy.keytab
-            - knox.keytab
-
-        - name: Debug keytab status
-          debug:
-            msg: "{{ item }} exists: {{ item_stat.stat.exists }}"
-          loop: "{{ keytab_status.results }}"
-          loop_control:
-            loop_var: item_stat
-
     - name: Ensure keytab directory exists on all nodes
       file:
         path: "{{ hadoop_keytabs_path }}"
@@ -193,6 +196,21 @@
         src: "templates/knox/gateway-site.xml.j2"
         dest: "{{ spark_home }}/conf/gateway-site.xml"
 
+
+
+    # - name: Restart Hadoop, Spark, Knox, and Livy services
+    #   service:
+    #     name: "{{ item }}"
+    #     state: restarted
+    #   loop:
+    #     - hadoop-hdfs-namenode
+    #     - hadoop-hdfs-datanode
+    #     - hadoop-yarn-resourcemanager
+    #     - hadoop-yarn-nodemanager
+    #     - spark-history-server
+    #     - livy-server
+    #     - knox-gateway
+    #
 
 
     # - name: Restart Hadoop, Spark, Knox, and Livy services
