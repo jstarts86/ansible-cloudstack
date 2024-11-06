@@ -3,6 +3,9 @@
 - name: Check keytab existence on KDCServer
   hosts: KDCServer
   become: true
+  vars: 
+    hadoop_keytabs_path: "/home/ubuntu/keytabs"
+
   tasks:
     - name: Check if keytab files exist
       stat:
