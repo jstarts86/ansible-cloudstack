@@ -22,8 +22,6 @@
       loop_control:
         loop_var: item_stat
 
-# Play 2: Main play to Kerberize Hadoop, Knox, Spark, and Livy
----
 - name: Kerberize Hadoop, Knox, Spark, and Livy
   hosts: all
   become: true
