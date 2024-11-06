@@ -1,0 +1,36 @@
+---
+# Define all variables at the top for global scope
+vars:
+  kerberos_realm: "CS2CLOUD.INTERNAL"
+  kdc_server: "192.168.1.40"  # IP of KDCServer
+  hadoop_keytabs_path: "/home/ubuntu/keytabs"
+  hadoop_user_principal: "hdfs/Knox@CS2CLOUD.INTERNAL"
+  http_principal: "HTTP/Knox@CS2CLOUD.INTERNAL"
+  livy_principal: "livy/Knox@CS2CLOUD.INTERNAL"
+  knox_principal: "knox/Knox@CS2CLOUD.INTERNAL"
+  yarn_principal: "yarn/Knox@CS2CLOUD.INTERNAL"
+    - name: Copy keytabs to Master1 from KDCServer
+      hosts: Master1
+      become: true
+      tasks:
+        - name: Ensure keytab directory exists on Master1
+          file:
+            path: "{{ hadoop_keytabs_path }}"
+            state: directory
+            owner: ubuntu
+            mode: '0755'
+
+        - name: Copy each keytab file from KDCServer
+          copy:
+            src: "{{ hadoop_keytabs_path }}/{{ item }}"
+            dest: "{{ hadoop_keytabs_path }}/{{ item }}"
+            owner: ubuntu
+            mode: '0600'
+            remote_src: yes
+          loop:
+            - hdfs.keytab
+            - HTTP.keytab
+            - yarn.keytab
+            - livy.keytab
+            - knox.keytab
+          delegate_to: KDCServer

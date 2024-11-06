@@ -1,5 +1,4 @@
 ---
-
 - name: Kerberize Hadoop, Knox, Spark, and Livy
   hosts: all
   become: true
@@ -79,14 +78,6 @@
         src: "templates/kerb/krb5.conf.j2"
         dest: "/etc/krb5.conf"
 
-    - name: Ensure ownership and permissions on Kerberos database
-      file:
-        path: "/var/lib/krb5kdc"
-        owner: root
-        group: root
-        mode: "0700"
-      when: inventory_hostname == "KDCServer"
-
     - name: Configure KDC on KDCServer
       when: inventory_hostname == "KDCServer"
       block:
@@ -122,38 +113,27 @@
         kadmin.local -q "xst -k {{ hadoop_keytabs_path }}/knox.keytab {{ knox_principal }}"
       when: inventory_hostname == "KDCServer"
 
-    - name: Verify keytab creation
-      stat:
-        path: "{{ hadoop_keytabs_path }}/hdfs.keytab"
-      register: hdfs_keytab_status
-      when: inventory_hostname == "KDCServer"
+    - name: Check keytab existence on KDCServer
+      hosts: KDCServer
+      become: true
+      tasks:
+        - name: Check if keytab files exist
+          stat:
+            path: "{{ hadoop_keytabs_path }}/{{ item }}"
+          register: keytab_status
+          loop:
+            - hdfs.keytab
+            - HTTP.keytab
+            - yarn.keytab
+            - livy.keytab
+            - knox.keytab
 
-    - name: Debug - Keytab Creation Status
-      debug:
-        msg: "Keytab file for hdfs was not created."
-      when: "hdfs_keytab_status is defined and (not hdfs_keytab_status.stat.exists | default(false))"
-
-    - name: Ensure hadoop_keytabs_path directory exists on all nodes
-      file:
-        path: "{{ hadoop_keytabs_path }}"
-        state: directory
-        owner: ubuntu
-        mode: '0755'
-
-    - name: Copy keytabs to other nodes from KDCServer
-      copy:
-        src: "{{ hadoop_keytabs_path }}/{{ item }}"
-        dest: "{{ hadoop_keytabs_path }}/{{ item }}"
-        owner: ubuntu
-        mode: '0600'
-        remote_src: yes
-      loop:
-        - hdfs.keytab
-        - HTTP.keytab
-        - yarn.keytab
-        - livy.keytab
-        - knox.keytab
-      delegate_to: KDCServer
+        - name: Debug keytab status
+          debug:
+            msg: "{{ item }} exists: {{ item_stat.stat.exists }}"
+          loop: "{{ keytab_status.results }}"
+          loop_control:
+            loop_var: item_stat
 
     - name: Ensure keytab directory exists on all nodes
       file:
@@ -161,7 +141,18 @@
         state: directory
         owner: ubuntu
         mode: '0755'
-    - name: Ensure hadoop configuration directory exists on all nodes
+
+    - name: Synchronize keytab files from KDCServer to all nodes
+      synchronize:
+        src: "{{ hadoop_keytabs_path }}/"
+        dest: "{{ hadoop_keytabs_path }}/"
+        mode: pull
+        owner: yes
+        group: yes
+      delegate_to: KDCServer
+      when: inventory_hostname != "KDCServer"
+
+    - name: Ensure Hadoop configuration directory exists on all nodes
       file:
         path: "{{ hadoop_home }}/etc/hadoop"
         state: directory
@@ -180,23 +171,10 @@
             src: "templates/hadoop/hdfs-site.xml.j2"
             dest: "{{ hadoop_home }}/etc/hadoop/hdfs-site.xml"
 
-        - name: Deploy SSL client/server configuration
-          template:
-            src: "templates/hadoop/ssl-client.xml.j2"
-            dest: "{{ hadoop_home }}/etc/hadoop/ssl-client.xml"
-          with_items:
-            - ssl-client.xml
-            - ssl-server.xml
-
         - name: Configure Yarn for Kerberos
           template:
             src: "templates/hadoop/yarn-site.xml.j2"
             dest: "{{ hadoop_home }}/etc/hadoop/yarn-site.xml"
-
-        - name: Configure MapReduce for Kerberos
-          template:
-            src: "templates/hadoop/mapred-site.xml.j2"
-            dest: "{{ hadoop_home }}/etc/hadoop/mapred-site.xml"
 
     - name: Configure Spark for Kerberos
       block:
@@ -204,11 +182,6 @@
           template:
             src: "templates/spark/spark-defaults.conf.j2"
             dest: "{{ spark_home }}/conf/spark-defaults.conf"
-
-        - name: Enable Spark history server SSL
-          template:
-            src: "templates/spark/spark-history-server.xml.j2"
-            dest: "{{ spark_home }}/conf/spark-history-server.xml"
 
     - name: Configure Livy for Kerberos
       template:
@@ -219,27 +192,6 @@
       template:
         src: "templates/knox/gateway-site.xml.j2"
         dest: "{{ spark_home }}/conf/gateway-site.xml"
-
-- name: Copy keytabs to Master1 from KDCServer
-  hosts: Master1
-  vars:
-  become: true
-  tasks:
-    - name: Copy each keytab file from KDCServer
-      copy:
-        src: "{{ hadoop_keytabs_path }}/{{ item }}"
-        dest: "{{ hadoop_keytabs_path }}/{{ item }}"
-        owner: ubuntu
-        mode: '0600'
-        remote_src: yes
-      loop:
-        - hdfs.keytab
-        - HTTP.keytab
-        - yarn.keytab
-        - livy.keytab
-        - knox.keytab
-      delegate_to: KDCServer
-
 
 
 
