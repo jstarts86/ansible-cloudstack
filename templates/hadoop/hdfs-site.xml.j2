@@ -4,14 +4,6 @@
       <name>dfs.namenode.name.dir</name>
       <value>{{ name_node_dir }}</value>
   </property>
-  <property>
-      <name>dfs.namenode.kerberos.principal</name>
-      <value>hdfs/{{ inventory_hostname }}@{{ kerberos_realm }}</value>
-  </property>
-  <property>
-      <name>dfs.secondary.namenode.kerberos.principal</name>
-      <value>hdfs/{{ inventory_hostname }}@{{ kerberos_realm }}</value>
-  </property>
   {% endif %}
 
   {% if 'hadoop_datanode' in group_names %}
@@ -19,84 +11,6 @@
       <name>dfs.datanode.data.dir</name>
       <value>{{ data_node_dir }}</value>
   </property>
-  <property>
-      <name>dfs.datanode.kerberos.principal</name>
-      <value>hdfs/{{ inventory_hostname }}@{{ kerberos_realm }}</value>
-  </property>
-  <property>
-      <name>dfs.datanode.keytab.file</name>
-      <value>{{ hdfs_keytab_file_path }}</value>
-  </property>
   {% endif %}
 
-  {% if 'hadoop_namenode' in group_names or 'hadoop_datanode' in group_names %}
-  <property>
-      <name>dfs.web.authentication.kerberos.principal</name>
-      <value>HTTP/{{ inventory_hostname }}@{{ kerberos_realm }}</value>
-  </property>
-  <property>
-      <name>dfs.web.authentication.kerberos.keytab</name>
-      <value>{{ http_keytab_file_path }}</value>
-  </property>
-  <property>
-      <name>dfs.namenode.keytab.file</name>
-      <value>{{ hdfs_keytab_file_path }}</value>
-  </property>
-  <property>
-      <name>dfs.datanode.keytab.file</name>
-      <value>{{ hdfs_keytab_file_path }}</value>
-  </property>
-  <property>
-      <name>dfs.secondary.namenode.keytab.file</name>
-      <value>{{ hdfs_keytab_file_path }}</value>
-  </property>
-  <property>
-      <name>dfs.namenode.http-address</name>
-      <value>Master1:9870</value>
-  </property>
-  <property>
-      <name>dfs.block.access.token.enable</name>
-      <value>true</value>
-  </property>
-  <property>
-      <name>dfs.http.policy</name>
-      <value>HTTPS_ONLY</value>
-  </property>
-  <property>
-      <name>dfs.https.server.keystore.resource</name>
-      <value>{{ ssl_keystore_path }}</value>
-  </property>
-  <property>
-      <name>dfs.https.server.keystore.password</name>
-      <value>{{ keystore_password }}</value>
-  </property>
-  <property>
-      <name>dfs.https.server.truststore.resource</name>
-      <value>{{ ssl_truststore_path }}</value>
-  </property>
-  <property>
-      <name>dfs.https.server.truststore.password</name>
-      <value>{{ keystore_password }}</value>
-  </property>
-  <property>
-      <name>dfs.datanode.data.dir.perm</name>
-      <value>700</value>
-  </property>
-  <property>
-      <name>dfs.data.transfer.protection</name>
-      <value>authentication</value>
-  </property>
-  <property>
-      <name>dfs.datanode.address</name>
-      <value>0.0.0.0:9866</value>
-  </property>
-  <property>
-      <name>dfs.datanode.http.address</name>
-      <value>0.0.0.0:9864</value>
-  </property>
-  <property>
-      <name>dfs.datanode.https.address</name>
-      <value>0.0.0.0:9865</value>
-  </property>
-  {% endif %}
 </configuration>

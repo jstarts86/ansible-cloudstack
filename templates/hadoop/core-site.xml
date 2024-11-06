@@ -1,0 +1,8 @@
+<configuration>
+    <!-- Set the default file system URI -->
+    <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://{{ namenode_hostname }}:9000</value>
+    </property>
+
+</configuration>
