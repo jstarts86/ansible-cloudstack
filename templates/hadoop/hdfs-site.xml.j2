@@ -4,7 +4,12 @@
         <name>fs.defaultFS</name>
         <value>hdfs://{{ namenode_hostname }}:9000</value>
     </property>
-
+    {% if 'hadoop_namenode' in group_names %}
+    <property>
+        <name>dfs.namenode.name.dir</name>
+        <value>{{ name_node_dir }}</value>
+    </property>
+  {% endif %}
     <!-- Knox Proxy User Configuration -->
     <property>
         <name>hadoop.proxyuser.knox.groups</name>
@@ -48,5 +53,10 @@
         <name>dfs.https.server.keystore.resource</name>
         <value>{{ ssl_keystore_path }}/STAR.handong.edu.crt</value>
     </property>
-
+    {% if 'hadoop_datanode' in group_names %}
+    <property>
+        <name>dfs.datanode.data.dir</name>
+        <value>{{ data_node_dir }}</value>
+    </property>
+     {% endif %}
 </configuration>

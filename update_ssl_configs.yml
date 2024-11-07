@@ -113,11 +113,6 @@
           src: templates/knox/gateway-site.xml.j2
           dest: "{{ knox_home }}/conf/gateway-site.xml"
         when: "'knox' in group_names"
-
-      - name: Clean up temporary PKCS12 keystore
-        file:
-          path: "{{ ssl_cert_path }}/star_keystore.p12"
-          state: absent
   #   - name: restart_hdfs
   #     service:
   #       name: hadoop-hdfs-namenode
