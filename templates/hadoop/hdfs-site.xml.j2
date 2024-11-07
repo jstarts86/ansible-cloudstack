@@ -1,16 +1,52 @@
 <configuration>
-  {% if 'hadoop_namenode' in group_names %}
-  <property>
-      <name>dfs.namenode.name.dir</name>
-      <value>{{ name_node_dir }}</value>
-  </property>
-  {% endif %}
+    <!-- Set the default file system URI -->
+    <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://{{ namenode_hostname }}:9000</value>
+    </property>
 
-  {% if 'hadoop_datanode' in group_names %}
-  <property>
-      <name>dfs.datanode.data.dir</name>
-      <value>{{ data_node_dir }}</value>
-  </property>
-  {% endif %}
+    <!-- Knox Proxy User Configuration -->
+    <property>
+        <name>hadoop.proxyuser.knox.groups</name>
+        <value>users</value>
+    </property>
+    <property>
+        <name>hadoop.proxyuser.knox.hosts</name>
+        <value>Knox</value>
+    </property>
+
+
+
+    <!-- Enable SSL for Hadoop -->
+    <property>
+        <name>hadoop.ssl.enabled</name>
+        <value>true</value>
+    </property>
+
+    <!-- Set HTTPS-Only Policy -->
+    <property>
+        <name>dfs.http.policy</name>
+        <value>HTTPS_ONLY</value>
+    </property>
+
+    <!-- Specify the HTTPS Port -->
+    <property>
+        <name>dfs.https.port</name>
+        <value>9871</value>
+    </property>
+
+    <!-- Keystore and Truststore for SSL Connections -->
+    <property>
+        <name>dfs.client.https.keystore.resource</name>
+        <value>ssl-server.xml</value>
+    </property>
+    <property>
+        <name>dfs.client.https.truststore.resource</name>
+        <value>ssl-client.xml</value>
+    </property>
+    <property>
+        <name>dfs.https.server.keystore.resource</name>
+        <value>{{ ssl_keystore_path }}/STAR.handong.edu.crt</value>
+    </property>
 
 </configuration>

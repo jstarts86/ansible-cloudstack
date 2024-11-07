@@ -11,8 +11,8 @@
       java_home: "/usr/lib/jvm/java-1.11.0-openjdk-amd64"
       java11_home: "/usr/lib/jvm/java-11-openjdk-amd64"    # Java 11 path for keytool
       namenode_hostname: "Master1"
-      ssl_keystore_path: "/etc/ssl/hadoop/keystore.jks"
-      ssl_truststore_path: "/etc/ssl/hadoop/truststore.jks"
+      ssl_keystore_path: "/home/ubuntu/certs/keystore.jks"
+      ssl_truststore_path: "/home/ubuntu/certs/truststore.jks"
       keystore_password: "{{ lookup('file', 'secure_files/ssl/password.txt') | default('') }}"
       ssl_cert_path: "/etc/ssl/hadoop"
       star_cert: "STAR.handong.edu.crt"

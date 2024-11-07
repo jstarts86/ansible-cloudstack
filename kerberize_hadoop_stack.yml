@@ -63,7 +63,7 @@
     ssl_keystore_path: "/etc/ssl/hadoop/keystore.jks"
     ssl_truststore_path: "/etc/ssl/hadoop/truststore.jks"
     keystore_password: "{{ lookup('file', 'secure_files/ssl/password.txt') | default('') }}"
-    ssl_cert_path: "/etc/ssl/hadoop"
+    ssl_cert_path: "/home/ubuntu/certs"
     star_cert: "STAR.handong.edu.crt"
     star_key: "STAR.handong.edu.key"
     chain_cert: "chainca.crt"
