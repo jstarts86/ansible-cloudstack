@@ -78,33 +78,6 @@
           - "{{ ssl_truststore_path }}"
         when: keystore_password != ""
 
-      - name: Import root certificate into truststore
-        command: >
-          keytool -import -alias root -file {{ ssl_cert_path }}/{{ chain_cert }} -keystore {{ ssl_truststore_path }}
-          -storepass {{ keystore_password }} -noprompt
-        args:
-          creates: "{{ ssl_truststore_path }}"
-        environment:
-          PATH: /usr/lib/jvm/java-11-openjdk-amd64/bin:{{ ansible_env.PATH }}
-
-      - name: Import STAR certificate into keystore
-        command: >
-          openssl pkcs12 -export -in {{ ssl_cert_path }}/{{ star_cert }} -inkey {{ ssl_cert_path }}/{{ star_key }}
-          -out {{ ssl_cert_path }}/star_keystore.p12 -name star -passout pass:{{ keystore_password }}
-        args:
-          creates: "{{ ssl_cert_path }}/star_keystore.p12"
-
-      - name: Import PKCS12 keystore into JKS keystore
-        command: >
-          keytool -importkeystore -srckeystore {{ ssl_cert_path }}/star_keystore.p12 -srcstoretype PKCS12
-          -srcstorepass {{ keystore_password }} -destkeystore {{ ssl_keystore_path }} -deststoretype JKS
-          -deststorepass {{ keystore_password }}
-        when: keystore_password != ""
-        args:
-          creates: "{{ ssl_keystore_path }}"
-        environment:
-          PATH: /usr/lib/jvm/java-11-openjdk-amd64/bin:{{ ansible_env.PATH }}
-
       - name: Configure HDFS for SSL
         template:
           src: templates/hadoop/hdfs-site.xml.j2
