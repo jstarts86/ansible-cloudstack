@@ -58,5 +58,17 @@
         <name>dfs.datanode.data.dir</name>
         <value>{{ data_node_dir }}</value>
     </property>
+    <property>
+        <name>dfs.datanode.address</name>
+        <value>0.0.0.0:9866</value>
+    </property>
+    <property>
+        <name>dfs.datanode.http.address</name>
+        <value>0.0.0.0:9864</value>
+    </property>
+    <property>
+        <name>dfs.datanode.https.address</name>
+        <value>0.0.0.0:9865</value>
+    </property>
      {% endif %}
 </configuration>
