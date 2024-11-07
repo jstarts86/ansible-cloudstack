@@ -47,64 +47,64 @@
       yarn_token_renew_interval: "3600000"
       yarn_token_max_lifetime: "604800000"
   tasks:
-      - name: Ensure SSL cert directory exists
-        file:
-          path: "{{ ssl_cert_path }}"
-          state: directory
-          owner: ubuntu
-          group: ubuntu
-          mode: '0755'
-
-      - name: Copy SSL certificates to each host
-        copy:
-          src: "secure_files/ssl/{{ item }}"
-          dest: "{{ ssl_cert_path }}/{{ item }}"
-          owner: ubuntu
-          group: ubuntu
-          mode: '0644'
-        with_items:
-          - "{{ star_cert }}"
-          - "{{ star_key }}"
-          - "{{ chain_cert }}"
-
-      - name: Set permissions on keystore and truststore files
-        file:
-          path: "{{ item }}"
-          owner: ubuntu
-          group: ubuntu
-          mode: '0644'
-        with_items:
-          - "{{ ssl_keystore_path }}"
-          - "{{ ssl_truststore_path }}"
-        when: keystore_password != ""
-
-      - name: Import root certificate into truststore
-        command: >
-          keytool -import -alias root -file {{ ssl_cert_path }}/{{ chain_cert }} -keystore {{ ssl_truststore_path }}
-          -storepass {{ keystore_password }} -noprompt
-        args:
-          creates: "{{ ssl_truststore_path }}"
-        environment:
-          PATH: /usr/lib/jvm/java-11-openjdk-amd64/bin:{{ ansible_env.PATH }}
-
-      - name: Import STAR certificate into keystore
-        command: >
-          openssl pkcs12 -export -in {{ ssl_cert_path }}/{{ star_cert }} -inkey {{ ssl_cert_path }}/{{ star_key }}
-          -out {{ ssl_cert_path }}/star_keystore.p12 -name star -passout pass:{{ keystore_password }}
-        args:
-          creates: "{{ ssl_cert_path }}/star_keystore.p12"
-
-      - name: Import PKCS12 keystore into JKS keystore
-        command: >
-          keytool -importkeystore -srckeystore {{ ssl_cert_path }}/star_keystore.p12 -srcstoretype PKCS12
-          -srcstorepass {{ keystore_password }} -destkeystore {{ ssl_keystore_path }} -deststoretype JKS
-          -deststorepass {{ keystore_password }}
-        when: keystore_password != ""
-        args:
-          creates: "{{ ssl_keystore_path }}"
-        environment:
-          PATH: /usr/lib/jvm/java-11-openjdk-amd64/bin:{{ ansible_env.PATH }}
-
+      # - name: Ensure SSL cert directory exists
+      #   file:
+      #     path: "{{ ssl_cert_path }}"
+      #     state: directory
+      #     owner: ubuntu
+      #     group: ubuntu
+      #     mode: '0755'
+      #
+      # - name: Copy SSL certificates to each host
+      #   copy:
+      #     src: "secure_files/ssl/{{ item }}"
+      #     dest: "{{ ssl_cert_path }}/{{ item }}"
+      #     owner: ubuntu
+      #     group: ubuntu
+      #     mode: '0644'
+      #   with_items:
+      #     - "{{ star_cert }}"
+      #     - "{{ star_key }}"
+      #     - "{{ chain_cert }}"
+      #
+      # - name: Set permissions on keystore and truststore files
+      #   file:
+      #     path: "{{ item }}"
+      #     owner: ubuntu
+      #     group: ubuntu
+      #     mode: '0644'
+      #   with_items:
+      #     - "{{ ssl_keystore_path }}"
+      #     - "{{ ssl_truststore_path }}"
+      #   when: keystore_password != ""
+      #
+      # - name: Import root certificate into truststore
+      #   command: >
+      #     keytool -import -alias root -file {{ ssl_cert_path }}/{{ chain_cert }} -keystore {{ ssl_truststore_path }}
+      #     -storepass {{ keystore_password }} -noprompt
+      #   args:
+      #     creates: "{{ ssl_truststore_path }}"
+      #   environment:
+      #     PATH: /usr/lib/jvm/java-11-openjdk-amd64/bin:{{ ansible_env.PATH }}
+      #
+      # - name: Import STAR certificate into keystore
+      #   command: >
+      #     openssl pkcs12 -export -in {{ ssl_cert_path }}/{{ star_cert }} -inkey {{ ssl_cert_path }}/{{ star_key }}
+      #     -out {{ ssl_cert_path }}/star_keystore.p12 -name star -passout pass:{{ keystore_password }}
+      #   args:
+      #     creates: "{{ ssl_cert_path }}/star_keystore.p12"
+      #
+      # - name: Import PKCS12 keystore into JKS keystore
+      #   command: >
+      #     keytool -importkeystore -srckeystore {{ ssl_cert_path }}/star_keystore.p12 -srcstoretype PKCS12
+      #     -srcstorepass {{ keystore_password }} -destkeystore {{ ssl_keystore_path }} -deststoretype JKS
+      #     -deststorepass {{ keystore_password }}
+      #   when: keystore_password != ""
+      #   args:
+      #     creates: "{{ ssl_keystore_path }}"
+      #   environment:
+      #     PATH: /usr/lib/jvm/java-11-openjdk-amd64/bin:{{ ansible_env.PATH }}
+      #
       - name: Configure HDFS for SSL
         template:
           src: templates/hadoop/hdfs-site.xml.j2
