@@ -4,8 +4,8 @@ livy.spark.deployMode = cluster
 livy.spark.home = {{ spark_home }}
 
 # SSL Configurations
-# livy.server.ssl.key-store={{ ssl_keystore_path }}
-# livy.server.ssl.key-store-password={{ keystore_password }}
-# livy.server.ssl.trust-store={{ ssl_truststore_path }}
-# livy.server.ssl.trust-store-password={{ keystore_password }}
-# livy.server.ssl.enabled=true
+livy.server.ssl.key-store={{ ssl_keystore_path }}
+livy.server.ssl.key-store-password={{ keystore_password }}
+livy.server.ssl.trust-store={{ ssl_truststore_path }}
+livy.server.ssl.trust-store-password={{ keystore_password }}
+livy.server.ssl.enabled=true

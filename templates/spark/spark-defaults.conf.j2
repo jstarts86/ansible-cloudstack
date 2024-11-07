@@ -14,9 +14,9 @@ spark.dynamicAllocation.initialExecutors   {{ spark_dynamicAllocation_initialExe
 spark.dynamicAllocation.executorIdleTimeout {{ spark_dynamicAllocation_executorIdleTimeout }}
 
 # SSL Configurations
-# spark.ssl.enabled=true
-# spark.ssl.keyStore={{ ssl_keystore_path }}
-# spark.ssl.keyStorePassword={{ keystore_password }}
-# spark.ssl.trustStore={{ ssl_truststore_path }}
-# spark.ssl.trustStorePassword={{ keystore_password }}
-# spark.ssl.ui.enabled=true
+spark.ssl.enabled=true
+spark.ssl.keyStore={{ ssl_keystore_path }}
+spark.ssl.keyStorePassword={{ keystore_password }}
+spark.ssl.trustStore={{ ssl_truststore_path }}
+spark.ssl.trustStorePassword={{ keystore_password }}
+spark.ssl.ui.enabled=true
