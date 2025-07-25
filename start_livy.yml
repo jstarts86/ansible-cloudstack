@@ -1,0 +1,12 @@
+---
+- name: Start Livy Server
+  hosts: hadoop_namenode
+  become: true
+  vars:
+    livy_version: "apache-livy-0.8.0-incubating_2.12-bin"
+    livy_home: "/opt/livy"
+    spark_home: "/usr/local/spark"
+    java_home: "/usr/lib/jvm/java-1.11.0-openjdk-amd64"
+  tasks:
+    - name: Start Livy
+      shell: "{{ livy_home }}/bin/livy-server start"
