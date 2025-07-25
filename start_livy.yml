@@ -1,0 +1,12 @@
+---
+- name: Start Livy Server
+  hosts: hadoop_namenode
+  become: yes
+  vars:
+    livy_home: "/opt/livy"
+  tasks:
+    - name: Start Livy Server
+      shell: "{{ livy_home }}/bin/livy-server start"
+      become_user: ubuntu
+      args:
+        chdir: "{{ livy_home }}"
