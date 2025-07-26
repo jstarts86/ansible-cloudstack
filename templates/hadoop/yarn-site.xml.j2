@@ -31,4 +31,21 @@
         <name>yarn.nodemanager.vmem-check-enabled</name>
         <value>{{ yarn_nodemanager_vmem_check_enabled }}</value>
     </property>
+    <property>
+        <name>yarn.log-aggregation-enable</name>
+        <value>true</value>
+        <description>
+            This enables the log aggregation feature. It's the master switch.
+        </description>
+    </property>
+
+    <property>
+        <name>yarn.log-aggregation.retain-seconds</name>
+        <value>604800</value>
+        <description>
+            How long to keep the aggregated logs in HDFS, in seconds.
+            This example sets it to 7 days (7 * 24 * 60 * 60 = 604800).
+            Set this to a value that makes sense for your needs.
+        </description>
+    </property>
 </configuration>
